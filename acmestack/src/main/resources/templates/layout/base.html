@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:fragment="layout(title, active, content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} + ' · AcmeStack'">AcmeStack</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="app">
+
+    <aside class="sidebar">
+        <div class="brand"><i class="bi bi-boxes"></i> AcmeStack</div>
+        <nav>
+            <a th:href="@{/dashboard}"   th:classappend="${active == 'dashboard'} ? 'active'"><i class="bi bi-house"></i> Dashboard</a>
+            <a th:href="@{/users}"       th:classappend="${active == 'users'} ? 'active'"><i class="bi bi-people"></i> Users</a>
+            <a th:href="@{/roles}"       th:classappend="${active == 'roles'} ? 'active'"><i class="bi bi-shield"></i> Roles</a>
+            <a th:href="@{/permissions}" th:classappend="${active == 'permissions'} ? 'active'"><i class="bi bi-shield-check"></i> Permissions</a>
+            <a th:href="@{/activity}"    th:classappend="${active == 'activity'} ? 'active'"><i class="bi bi-clock-history"></i> Activity</a>
+            <a th:href="@{/settings}"    th:classappend="${active == 'settings'} ? 'active'"><i class="bi bi-gear"></i> Settings</a>
+        </nav>
+        <div class="upgrade">
+            <div class="fw-semibold"><i class="bi bi-gem text-warning"></i> Upgrade to Pro</div>
+            <small>Unlock advanced permissions, audit logs and more.</small>
+            <button class="btn btn-light btn-sm w-100 mt-2">Upgrade</button>
+        </div>
+    </aside>
+
+    <div class="main">
+        <header class="topbar">
+            <div class="search"><i class="bi bi-search"></i>
+                <input type="text" placeholder="Search anything..."></div>
+            <div class="topbar-right">
+                <i class="bi bi-bell"></i>
+                <div class="me">
+                    <div class="avatar">AC</div>
+                    <div><div class="fw-semibold">Alex Carter</div><small class="text-muted">Product Admin</small></div>
+                </div>
+            </div>
+        </header>
+
+        <main class="content" th:replace="${content}">content</main>
+    </div>
+</div>
+</body>
+</html>
