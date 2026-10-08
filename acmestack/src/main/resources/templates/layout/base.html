@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       th:fragment="layout(title, active, content)">
 <head>
     <meta charset="UTF-8">
@@ -15,12 +16,18 @@
     <aside class="sidebar">
         <div class="brand"><i class="bi bi-boxes"></i> AcmeStack</div>
         <nav>
-            <a th:href="@{/dashboard}"   th:classappend="${active == 'dashboard'} ? 'active'"><i class="bi bi-house"></i> Dashboard</a>
-            <a th:href="@{/users}"       th:classappend="${active == 'users'} ? 'active'"><i class="bi bi-people"></i> Users</a>
-            <a th:href="@{/roles}"       th:classappend="${active == 'roles'} ? 'active'"><i class="bi bi-shield"></i> Roles</a>
-            <a th:href="@{/permissions}" th:classappend="${active == 'permissions'} ? 'active'"><i class="bi bi-shield-check"></i> Permissions</a>
-            <a th:href="@{/activity}"    th:classappend="${active == 'activity'} ? 'active'"><i class="bi bi-clock-history"></i> Activity</a>
-            <a th:href="@{/settings}"    th:classappend="${active == 'settings'} ? 'active'"><i class="bi bi-gear"></i> Settings</a>
+            <a th:href="@{/dashboard}" th:classappend="${active == 'dashboard'} ? 'active'"
+               sec:authorize="hasAuthority('reports.view')"><i class="bi bi-house"></i> Dashboard</a>
+            <a th:href="@{/users}" th:classappend="${active == 'users'} ? 'active'"
+               sec:authorize="hasAuthority('user_management.view')"><i class="bi bi-people"></i> Users</a>
+            <a th:href="@{/roles}" th:classappend="${active == 'roles'} ? 'active'"
+               sec:authorize="hasAuthority('role_management.view')"><i class="bi bi-shield"></i> Roles</a>
+            <a th:href="@{/permissions}" th:classappend="${active == 'permissions'} ? 'active'"
+               sec:authorize="hasAuthority('permission_management.view')"><i class="bi bi-shield-check"></i> Permissions</a>
+            <a th:href="@{/activity}" th:classappend="${active == 'activity'} ? 'active'"
+               sec:authorize="hasAuthority('audit.view')"><i class="bi bi-clock-history"></i> Activity</a>
+            <a th:href="@{/settings}" th:classappend="${active == 'settings'} ? 'active'"
+               sec:authorize="hasAuthority('settings.view')"><i class="bi bi-gear"></i> Settings</a>
         </nav>
         <div class="upgrade">
             <div class="fw-semibold"><i class="bi bi-gem text-warning"></i> Upgrade to Pro</div>
@@ -33,12 +40,15 @@
         <header class="topbar">
             <div class="search"><i class="bi bi-search"></i>
                 <input type="text" placeholder="Search anything..."></div>
-            <div class="topbar-right">
-                <i class="bi bi-bell"></i>
-                <div class="me">
-                    <div class="avatar">AC</div>
-                    <div><div class="fw-semibold">Alex Carter</div><small class="text-muted">Product Admin</small></div>
+            <div class="me" sec:authorize="isAuthenticated()">
+                <div class="avatar" th:text="${#authentication.principal.initials}">AC</div>
+                <div>
+                    <div class="fw-semibold" th:text="${#authentication.principal.name}">Name</div>
+                    <small class="text-muted" th:text="${#authentication.principal.roleName}">Role</small>
                 </div>
+                <form th:action="@{/logout}" method="post" class="ms-2">
+                    <button class="btn btn-sm btn-outline-secondary" title="Sign out"><i class="bi bi-box-arrow-right"></i></button>
+                </form>
             </div>
         </header>
 

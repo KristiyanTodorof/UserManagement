@@ -43,3 +43,7 @@ body { margin: 0; background: var(--bg); color: var(--text); font-family: system
 .content { padding: 28px; }
 .page-title { font-size: 32px; font-weight: 700; margin: 0; }
 .page-subtitle { color: var(--muted); margin: 4px 0 24px; }
+
+.login-body { display: grid; place-items: center; min-height: 100vh; }
+.login-card { background: #fff; border: 1px solid var(--border); border-radius: 16px;
+    padding: 36px; width: 100%; max-width: 400px; box-shadow: 0 10px 30px rgba(15,31,61,.08); }
