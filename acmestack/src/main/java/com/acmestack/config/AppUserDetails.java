@@ -45,5 +45,5 @@ public class AppUserDetails implements UserDetails {
     @Override public boolean isAccountNonExpired() { return true; }
     @Override public boolean isAccountNonLocked() { return status != UserStatus.SUSPENDED; }
     @Override public boolean isCredentialsNonExpired() { return true; }
-    @Override public boolean isEnabled() { return status != UserStatus.PENDING; }
+    @Override public boolean isEnabled() { return true; }
 }
