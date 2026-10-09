@@ -13,4 +13,10 @@ public interface RolePermissionRepository extends JpaRepository<RolePermission, 
     WHERE rp.role.id = :roleId AND rp.effect = com.acmestack.permission.Effect.GRANTED
     """)
     List<String> findGrantedKeys(@Param("roleId") Long roleId);
+
+    @Query("""
+    SELECT rp FROM RolePermission rp JOIN FETCH rp.permission
+    WHERE rp.role.id = :roleId ORDER BY rp.permission.id
+    """)
+    List<RolePermission> findWithPermissionByRoleId(@Param("roleId") Long roleId);
 }
