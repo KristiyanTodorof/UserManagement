@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(${title}, ${active}, ~{::main})}">
+<body>
+<main class="content">
+    <h1 class="page-title" th:text="${title}">Add user</h1>
+    <p class="page-subtitle">New users start as Pending until their first sign-in.</p>
+
+    <div class="form-card">
+        <form th:action="${form.id == null} ? @{/users} : @{/users/{id}(id=${form.id})}"
+              th:object="${form}" method="post">
+
+            <div class="mb-3">
+                <label class="form-label">Name</label>
+                <input type="text" th:field="*{name}" class="form-control"
+                       th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'">
+                <div class="invalid-feedback" th:errors="*{name}"></div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="text" th:field="*{email}" class="form-control"
+                       th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'">
+                <div class="invalid-feedback" th:errors="*{email}"></div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Role</label>
+                <select th:field="*{roleId}" class="form-select"
+                        th:classappend="${#fields.hasErrors('roleId')} ? 'is-invalid'">
+                    <option th:each="r : ${roles}" th:value="${r.id}" th:text="${r.name}"></option>
+                </select>
+                <div class="invalid-feedback" th:errors="*{roleId}"></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a class="btn btn-outline-secondary" th:href="@{/users}">Cancel</a>
+        </form>
+    </div>
+</main>
+</body>
+</html>

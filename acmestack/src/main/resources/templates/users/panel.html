@@ -1,0 +1,86 @@
+<div th:fragment="panel" xmlns:th="http://www.thymeleaf.org"
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+    <button class="panel-close" type="button"
+            onclick="document.getElementById('panel').innerHTML=''"><i class="bi bi-x-lg"></i></button>
+
+    <div class="panel-head">
+        <div class="avatar big" th:classappend="'av-' + ${@fmt.colorIndex(u.name)}"
+             th:text="${@fmt.initials(u.name)}">AB</div>
+        <h4 class="mb-1" th:text="${u.name}">Name</h4>
+        <span class="pill" th:classappend="'st-' + ${#strings.toLowerCase(u.status)}"
+              th:text="${#strings.capitalize(#strings.toLowerCase(u.status))}">Active</span>
+        <div class="mt-2">
+            <span class="pill role-pill" th:text="${u.role.name}">Role</span>
+            <span class="text-muted ms-1">· Joined <span th:text="${@fmt.date(u.createdAt)}"></span></span>
+        </div>
+    </div>
+
+    <div class="panel-actions">
+        <a class="btn btn-primary btn-sm" th:href="@{/users/{id}/edit(id=${u.id})}"
+           sec:authorize="hasAuthority('user_management.edit')"><i class="bi bi-pencil"></i> Edit User</a>
+
+        <form th:action="@{/users/{id}/reset-password(id=${u.id})}" method="post"
+              onsubmit="return confirm('Generate a new temporary password?')"
+              sec:authorize="hasAuthority('user_management.edit')">
+            <button class="btn btn-outline-secondary btn-sm"><i class="bi bi-key"></i> Reset Password</button>
+        </form>
+
+        <th:block th:unless="${self}" sec:authorize="hasAuthority('user_management.suspend')">
+            <form th:if="${u.status.name() != 'SUSPENDED'}"
+                  th:action="@{/users/{id}/suspend(id=${u.id})}" method="post"
+                  onsubmit="return confirm('Suspend this user?')">
+                <button class="btn btn-outline-warning btn-sm"><i class="bi bi-slash-circle"></i> Suspend</button>
+            </form>
+            <form th:if="${u.status.name() == 'SUSPENDED'}"
+                  th:action="@{/users/{id}/reactivate(id=${u.id})}" method="post">
+                <button class="btn btn-outline-success btn-sm"><i class="bi bi-check-circle"></i> Reactivate</button>
+            </form>
+        </th:block>
+    </div>
+
+    <!-- tabs -->
+    <div class="panel-tabs">
+        <a th:classappend="${tab == 'overview'} ? 'active'"
+           th:attr="hx-get=@{/users/{id}/panel(id=${u.id},tab='overview')}" hx-target="#panel">Overview</a>
+        <a th:classappend="${tab == 'permissions'} ? 'active'"
+           th:attr="hx-get=@{/users/{id}/panel(id=${u.id},tab='permissions')}" hx-target="#panel">Roles &amp; Permissions</a>
+        <a th:classappend="${tab == 'activity'} ? 'active'"
+           th:attr="hx-get=@{/users/{id}/panel(id=${u.id},tab='activity')}" hx-target="#panel">Activity</a>
+    </div>
+
+    <!-- Overview -->
+    <div class="panel-body" th:if="${tab == 'overview'}">
+        <dl class="detail-list">
+            <dt>Email</dt><dd th:text="${u.email}">email</dd>
+            <dt>Role</dt><dd th:text="${u.role.name}">Role</dd>
+            <dt>Status</dt><dd th:text="${#strings.capitalize(#strings.toLowerCase(u.status))}">Active</dd>
+            <dt>Last active</dt><dd th:text="${@fmt.ago(u.lastActiveAt)}">2 hours ago</dd>
+            <dt>Joined</dt><dd th:text="${@fmt.date(u.createdAt)}">Jan 1, 2024</dd>
+        </dl>
+    </div>
+
+    <!-- Roles & Permissions -->
+    <div class="panel-body" th:if="${tab == 'permissions'}">
+        <h6>Role</h6>
+        <span class="pill role-pill" th:text="${u.role.name}">Role</span>
+        <p class="text-muted small mt-2" th:text="${u.role.description}">Description</p>
+
+        <h6 class="mt-4">Permissions</h6>
+        <div class="perm-row" th:each="g : ${groups}">
+            <span th:text="${g.category}">Category</span>
+            <span class="pill st-active"  th:if="${g.granted == g.total}">Granted</span>
+            <span class="pill st-pending" th:if="${g.granted > 0 and g.granted < g.total}"
+                  th:text="${g.granted} + '/' + ${g.total}">2/5</span>
+            <span class="pill st-suspended" th:if="${g.granted == 0}">Denied</span>
+        </div>
+        <div class="info-note" th:if="${u.role.name == 'Admin'}">
+            <i class="bi bi-info-circle"></i> This user has full administrative access to the system.
+        </div>
+    </div>
+
+    <!-- Activity (Phase 4) -->
+    <div class="panel-body" th:if="${tab == 'activity'}">
+        <p class="text-muted">The activity log arrives in Phase 4.</p>
+    </div>
+</div>
