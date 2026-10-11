@@ -112,3 +112,27 @@ tr:hover .clickable { background: #f1f5ff; }
 .info-note { background: #eff6ff; color: #1d4ed8; border-radius: 10px; padding: 10px 12px; margin-top: 16px; font-size: 13px; }
 
 .form-card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 28px; max-width: 520px; }
+
+/* ---------- activity ---------- */
+.stat-icon.red { background: #fee2e2; color: #dc2626; }
+.trend.bad { color: #dc2626; }
+
+.toolbar.wrap { flex-wrap: wrap; }
+.toolbar .search-input { min-width: 200px; }
+
+.clickable-row { cursor: pointer; }
+.clickable-row:hover { --bs-table-bg: #f1f5ff; }
+
+.event-cell { display: flex; gap: 12px; align-items: center; }
+.event-icon { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center;
+    flex-shrink: 0; background: #eef2ff; color: #4f46e5; }
+.event-icon.big { width: 64px; height: 64px; font-size: 26px; margin-bottom: 10px; }
+
+.sev-low { background: #dbeafe; color: #1d4ed8; }
+.sev-medium { background: #ffedd5; color: #c2410c; }
+.sev-high { background: #fee2e2; color: #b91c1c; }
+
+.feed-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.current-page { color: var(--muted); padding: 4px 8px; }
+.json { background: #0f172a; color: #e2e8f0; border-radius: 10px; padding: 12px;
+    font-size: 12px; white-space: pre-wrap; word-break: break-all; margin: 0; }

@@ -12,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.acmestack.audit.AuditService;
 
 @Controller
 @RequestMapping("/users")
@@ -19,10 +20,12 @@ public class UserController {
 
     private final UserService service;
     private final RoleRepository roles;
+    private final AuditService audit;
 
-    public UserController(UserService service, RoleRepository roles) {
+    public UserController(UserService service, RoleRepository roles, AuditService audit) {
         this.service = service;
         this.roles = roles;
+        this.audit = audit;
     }
 
     // ---------- list ----------
@@ -62,6 +65,7 @@ public class UserController {
         model.addAttribute("tab", tab);
         model.addAttribute("self", u.getId().equals(me.getId()));
         model.addAttribute("groups", service.permissionGroups(u.getRole().getId()));
+        if ("activity".equals(tab)) model.addAttribute("events", audit.recentForUser(id));
         return "users/panel :: panel";
     }
 

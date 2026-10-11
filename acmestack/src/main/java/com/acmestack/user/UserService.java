@@ -1,5 +1,7 @@
 package com.acmestack.user;
 
+import com.acmestack.audit.AuditService;
+import com.acmestack.audit.EventType;
 import com.acmestack.common.BusinessException;
 import com.acmestack.permission.Effect;
 import com.acmestack.permission.RolePermission;
@@ -30,16 +32,20 @@ public class UserService {
     private final RoleRepository roles;
     private final RolePermissionRepository rolePermissions;
     private final PasswordEncoder encoder;
+    private final AuditService audit;
     private final SecureRandom random = new SecureRandom();
 
     public UserService(UserRepository users, RoleRepository roles,
-                       RolePermissionRepository rolePermissions, PasswordEncoder encoder) {
+                       RolePermissionRepository rolePermissions, PasswordEncoder encoder,
+                       AuditService audit) {
         this.users = users;
         this.roles = roles;
         this.rolePermissions = rolePermissions;
         this.encoder = encoder;
+        this.audit = audit;
     }
 
+    // ---------- reading ----------
 
     @Transactional(readOnly = true)
     public Page<User> search(String q, Long roleId, UserStatus status, String period, int page) {
@@ -83,6 +89,9 @@ public class UserService {
                 .toList();
     }
 
+    // ---------- writing ----------
+
+    /** Returns the temporary password (email sending is out of scope, so we show it once). */
     @Transactional
     public String invite(String name, String email, Long roleId) {
         String cleanEmail = email.trim().toLowerCase();
@@ -98,24 +107,41 @@ public class UserService {
         u.setCreatedAt(LocalDateTime.now());
         u.setPasswordHash(encoder.encode(temp));
         users.save(u);
+
+        audit.log(EventType.USER_INVITED, "Invited a new user to the workspace", "User",
+                u.getId(), u.getName(), Map.of("email", cleanEmail, "role", u.getRole().getName()));
         return temp;
     }
 
     @Transactional
     public void update(Long id, String name, String email, Long roleId, Long actingUserId) {
         User u = get(id);
+        String cleanName = name.trim();
         String cleanEmail = email.trim().toLowerCase();
         if (!u.getEmail().equalsIgnoreCase(cleanEmail) && users.existsByEmailIgnoreCase(cleanEmail)) {
             throw new BusinessException("A user with this email already exists.");
         }
+
         Role newRole = findRole(roleId);
-        if (!u.getRole().getId().equals(newRole.getId())) {
+        String oldRoleName = u.getRole().getName();
+        boolean roleChanged = !u.getRole().getId().equals(newRole.getId());
+        if (roleChanged) {
             if (u.getId().equals(actingUserId)) throw new BusinessException("You can't change your own role.");
             guardLastAdmin(u);
         }
-        u.setName(name.trim());
+        boolean detailsChanged = !u.getName().equals(cleanName) || !u.getEmail().equalsIgnoreCase(cleanEmail);
+
+        u.setName(cleanName);
         u.setEmail(cleanEmail);
         u.setRole(newRole);
+
+        if (roleChanged) {
+            audit.log(EventType.ROLE_CHANGED, "Changed role from " + oldRoleName + " to " + newRole.getName(),
+                    "User", u.getId(), u.getName(), Map.of("from", oldRoleName, "to", newRole.getName()));
+        }
+        if (detailsChanged) {
+            audit.log(EventType.USER_UPDATED, "Updated user details", "User", u.getId(), u.getName(), null);
+        }
     }
 
     @Transactional
@@ -124,6 +150,7 @@ public class UserService {
         if (u.getId().equals(actingUserId)) throw new BusinessException("You can't suspend yourself.");
         guardLastAdmin(u);
         u.setStatus(UserStatus.SUSPENDED);
+        audit.log(EventType.USER_SUSPENDED, "Suspended a user account", "User", u.getId(), u.getName(), null);
     }
 
     @Transactional
@@ -131,6 +158,7 @@ public class UserService {
         User u = get(id);
         u.setStatus(UserStatus.ACTIVE);
         u.setFailedLoginCount(0);
+        audit.log(EventType.USER_REACTIVATED, "Reactivated a user account", "User", u.getId(), u.getName(), null);
     }
 
     @Transactional
@@ -139,6 +167,7 @@ public class UserService {
         if (u.getId().equals(actingUserId)) throw new BusinessException("You can't delete yourself.");
         guardLastAdmin(u);
         u.setDeletedAt(LocalDateTime.now());   // soft delete
+        audit.log(EventType.USER_DEACTIVATED, "Deactivated a user account", "User", u.getId(), u.getName(), null);
     }
 
     @Transactional
@@ -147,8 +176,11 @@ public class UserService {
         String temp = tempPassword();
         u.setPasswordHash(encoder.encode(temp));
         u.setFailedLoginCount(0);
+        audit.log(EventType.PASSWORD_RESET, "Reset a user's password", "User", u.getId(), u.getName(), null);
         return temp;
     }
+
+    // ---------- helpers ----------
 
     private Role findRole(Long roleId) {
         return roles.findById(roleId).orElseThrow(() -> new BusinessException("Role not found."));

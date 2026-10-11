@@ -79,8 +79,18 @@
         </div>
     </div>
 
-    <!-- Activity (Phase 4) -->
+    <!-- Activity -->
     <div class="panel-body" th:if="${tab == 'activity'}">
-        <p class="text-muted">The activity log arrives in Phase 4.</p>
+        <p class="text-muted" th:if="${#lists.isEmpty(events)}">No activity recorded for this user yet.</p>
+        <div class="feed-item" th:each="e : ${events}">
+            <div class="event-icon" th:classappend="'sev-' + ${#strings.toLowerCase(e.severity)}">
+                <i th:class="'bi ' + ${e.eventType.icon}"></i>
+            </div>
+            <div>
+                <div class="fw-semibold" th:text="${e.eventType.label}">Event</div>
+                <small class="text-muted" th:text="${e.description}">Description</small>
+                <div><small class="text-muted" th:text="${@fmt.ago(e.createdAt)}">2 hours ago</small></div>
+            </div>
+        </div>
     </div>
 </div>

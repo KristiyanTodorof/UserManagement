@@ -37,4 +37,8 @@ public class Fmt {
     public int colorIndex(String name) {
         return Math.floorMod(name.hashCode(), 6);
     }
+
+    public String dateTime(LocalDateTime t) {
+        return t == null ? "—" : t.format(DateTimeFormatter.ofPattern("MMM d, yyyy, h:mm a", Locale.ENGLISH));
+    }
 }

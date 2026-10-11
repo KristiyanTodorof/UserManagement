@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="stat(label, icon, color, stat)" class="stat-card">
+    <div class="stat-icon" th:classappend="${color}"><i class="bi" th:classappend="${icon}"></i></div>
+    <div>
+        <div class="stat-label" th:text="${label}">Label</div>
+        <div class="stat-value">
+            <span th:text="${stat.today()}">0</span>
+            <span class="trend" th:if="${stat.pct() != null}"
+                  th:classappend="${stat.good()} ? '' : 'bad'"
+                  th:text="${stat.pct() >= 0 ? '↑ +' : '↓ '} + ${stat.pct()} + '%'"></span>
+        </div>
+        <div class="stat-note"
+             th:text="${(stat.diff() >= 0 ? '+' : '') + stat.diff()} + ' from yesterday'"></div>
+    </div>
+</div>
+</body>
+</html>

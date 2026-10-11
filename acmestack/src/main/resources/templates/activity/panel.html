@@ -1,0 +1,37 @@
+<div th:fragment="panel" xmlns:th="http://www.thymeleaf.org">
+
+    <button class="panel-close" type="button"
+            onclick="document.getElementById('panel').innerHTML=''"><i class="bi bi-x-lg"></i></button>
+
+    <div class="panel-head">
+        <div class="event-icon big"><i th:class="'bi ' + ${e.eventType.icon}"></i></div>
+        <h4 class="mb-1" th:text="${e.eventType.label}">Event</h4>
+        <span class="pill" th:classappend="${e.status.name() == 'SUCCESS'} ? 'st-active' : 'st-suspended'"
+              th:text="${e.status.name() == 'SUCCESS'} ? 'Success' : 'Failed'">Success</span>
+        <div class="text-muted mt-2">
+            <span th:text="${@fmt.dateTime(e.createdAt)}">date</span> ·
+            <span th:text="${@fmt.ago(e.createdAt)}">2 hours ago</span>
+        </div>
+    </div>
+
+    <div class="panel-tabs"><a class="active">Details</a></div>
+
+    <dl class="detail-list">
+        <dt>Event</dt><dd th:text="${e.description}">Description</dd>
+        <dt>Actor</dt>
+        <dd>
+            <div class="fw-semibold" th:text="${e.actorName}">Name</div>
+            <small class="text-muted" th:text="${e.actorEmail} ?: '—'">email</small>
+        </dd>
+        <dt>Target</dt><dd th:text="${e.targetLabel} ?: '—'">Target</dd>
+        <dt>Severity</dt>
+        <dd><span class="pill" th:classappend="'sev-' + ${#strings.toLowerCase(e.severity)}"
+                  th:text="${#strings.capitalize(#strings.toLowerCase(e.severity))}">Low</span></dd>
+        <dt>IP address</dt><dd th:text="${e.ipAddress} ?: '—'">127.0.0.1</dd>
+        <dt>Location</dt><dd th:text="${e.location} ?: '—'">Location</dd>
+        <dt>Device</dt><dd th:text="${e.device} ?: '—'">Device</dd>
+    </dl>
+
+    <h6 class="mt-4">Additional metadata</h6>
+    <pre class="json" th:text="${e.metadata}">{}</pre>
+</div>

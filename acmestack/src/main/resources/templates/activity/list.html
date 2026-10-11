@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(${title}, ${active}, ~{::main})}">
+<body>
+<main class="content">
+    <div class="users-layout">
+
+        <section class="users-main">
+            <h1 class="page-title">Activity</h1>
+            <p class="page-subtitle">Track user actions, audit logs, sign-ins, and critical system events.</p>
+
+            <div class="stat-grid">
+                <div th:replace="~{fragments/stat-card :: stat('Events Today', 'bi-file-text', 'blue', ${stats.events()})}"></div>
+                <div th:replace="~{fragments/stat-card :: stat('Failed Sign-ins', 'bi-shield-exclamation', 'red', ${stats.failedSignIns()})}"></div>
+                <div th:replace="~{fragments/stat-card :: stat('Changes to Roles', 'bi-people', 'indigo', ${stats.roleChanges()})}"></div>
+                <div th:replace="~{fragments/stat-card :: stat('Exported Reports', 'bi-file-earmark-arrow-down', 'green', ${stats.exports()})}"></div>
+            </div>
+
+            <form class="toolbar wrap" method="get" th:action="@{/activity}">
+                <select name="period" class="form-select" onchange="this.form.submit()">
+                    <option value="1"   th:selected="${period == '1'}">Last 24 hours</option>
+                    <option value="7"   th:selected="${period == '7'}">Last 7 days</option>
+                    <option value="30"  th:selected="${period == '30'}">Last 30 days</option>
+                    <option value="90"  th:selected="${period == '90'}">Last 90 days</option>
+                    <option value="all" th:selected="${period == 'all'}">All time</option>
+                </select>
+                <select name="type" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Event Types</option>
+                    <option th:each="t : ${eventTypes}" th:value="${t}" th:text="${t.label}"
+                            th:selected="${t == type}"></option>
+                </select>
+                <select name="actorId" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Actors</option>
+                    <option th:each="a : ${actors}" th:value="${a.id()}" th:text="${a.name()}"
+                            th:selected="${a.id() == actorId}"></option>
+                </select>
+                <select name="severity" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Severities</option>
+                    <option th:each="s : ${severities}" th:value="${s}"
+                            th:text="${#strings.capitalize(#strings.toLowerCase(s))}"
+                            th:selected="${s == severity}"></option>
+                </select>
+                <input type="text" name="q" th:value="${q}" class="form-control search-input" placeholder="Search events...">
+                <a class="btn btn-primary text-nowrap"
+                   th:href="@{/activity/export(q=${q},type=${type},actorId=${actorId},severity=${severity},period=${period})}"
+                   sec:authorize="hasAuthority('audit.export')"><i class="bi bi-download"></i> Export</a>
+            </form>
+
+            <div class="table-card">
+                <table class="table align-middle mb-0">
+                    <thead>
+                    <tr><th>Actor</th><th>Event</th><th>Target</th><th>Severity</th><th>Timestamp</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="e : ${page.content}" class="clickable-row"
+                        th:attr="hx-get=@{/activity/{id}/panel(id=${e.id})}" hx-target="#panel">
+                        <td>
+                            <div class="user-cell">
+                                <div class="avatar" th:classappend="'av-' + ${@fmt.colorIndex(e.actorName)}"
+                                     th:text="${@fmt.initials(e.actorName)}">AB</div>
+                                <div>
+                                    <div class="fw-semibold" th:text="${e.actorName}">Actor</div>
+                                    <small class="text-muted" th:text="${e.actorEmail}">email</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="event-cell">
+                                <div class="event-icon"><i th:class="'bi ' + ${e.eventType.icon}"></i></div>
+                                <div>
+                                    <div class="fw-semibold" th:text="${e.eventType.label}">Event</div>
+                                    <small class="text-muted" th:text="${e.description}">Description</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td th:text="${e.targetLabel} ?: '—'">Target</td>
+                        <td><span class="pill" th:classappend="'sev-' + ${#strings.toLowerCase(e.severity)}"
+                                  th:text="${#strings.capitalize(#strings.toLowerCase(e.severity))}">Low</span></td>
+                        <td>
+                            <div th:text="${@fmt.ago(e.createdAt)}">2 hours ago</div>
+                            <small class="text-muted" th:text="${@fmt.dateTime(e.createdAt)}">date</small>
+                        </td>
+                        <td>
+                <span class="pill" th:classappend="${e.status.name() == 'SUCCESS'} ? 'st-active' : 'st-suspended'"
+                      th:text="${e.status.name() == 'SUCCESS'} ? 'Success' : 'Failed'">Success</span>
+                        </td>
+                    </tr>
+                    <tr th:if="${page.empty}"><td colspan="6" class="text-center text-muted py-4">No events found.</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="pager" th:if="${page.totalPages > 1}">
+          <span class="text-muted"
+                th:text="'Showing ' + (${page.number} * ${page.size} + 1) + '–' + (${page.number} * ${page.size} + ${page.numberOfElements}) + ' of ' + ${page.totalElements}"></span>
+                    <div class="pager-links">
+                        <a th:if="${page.hasPrevious()}"
+                           th:href="@{/activity(q=${q},type=${type},actorId=${actorId},severity=${severity},period=${period},page=${page.number - 1})}">‹ Previous</a>
+                        <span class="current-page" th:text="'Page ' + ${page.number + 1} + ' of ' + ${page.totalPages}">Page 1 of 3</span>
+                        <a th:if="${page.hasNext()}"
+                           th:href="@{/activity(q=${q},type=${type},actorId=${actorId},severity=${severity},period=${period},page=${page.number + 1})}">Next ›</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <aside id="panel" class="side-panel"></aside>
+    </div>
+</main>
+</body>
+</html>
