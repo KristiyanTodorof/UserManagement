@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AppUserDetailsService implements UserDetailsService {
@@ -28,7 +29,16 @@ public class AppUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = users.findByEmailAndDeletedAtIsNull(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Unknown user"));
+        return toDetails(user);
+    }
 
+    /** Used on every request to refresh the signed-in user. Empty if the user was deleted. */
+    @Transactional(readOnly = true)
+    public Optional<AppUserDetails> loadById(Long id) {
+        return users.findActiveById(id).map(this::toDetails);
+    }
+
+    private AppUserDetails toDetails(User user) {
         List<SimpleGrantedAuthority> authorities = rolePermissions
                 .findGrantedKeys(user.getRole().getId()).stream()
                 .map(SimpleGrantedAuthority::new)

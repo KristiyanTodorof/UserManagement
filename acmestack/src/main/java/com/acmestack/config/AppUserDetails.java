@@ -39,6 +39,10 @@ public class AppUserDetails implements UserDetails {
         return (first + last).toUpperCase();
     }
 
+    public boolean can(String permission) {
+        return authorities.stream().anyMatch(a -> a.getAuthority().equals(permission));
+    }
+
     @Override public Collection<? extends GrantedAuthority> getAuthorities() { return authorities; }
     @Override public String getPassword() { return passwordHash; }
     @Override public String getUsername() { return email; }

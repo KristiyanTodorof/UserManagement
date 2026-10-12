@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import java.util.Optional;
 
 import java.util.List;
 
@@ -33,4 +34,17 @@ public interface RolePermissionRepository extends JpaRepository<RolePermission, 
     @Modifying
     @Query("DELETE FROM RolePermission rp WHERE rp.role.id = :roleId")
     void deleteByRoleId(@Param("roleId") Long roleId);
+
+    Optional<RolePermission> findByRoleIdAndPermissionId(Long roleId, Long permissionId);
+
+    @Query("SELECT rp FROM RolePermission rp JOIN FETCH rp.role JOIN FETCH rp.permission")
+    List<RolePermission> findAllWithRefs();
+
+    @Query("""
+    SELECT rp FROM RolePermission rp JOIN FETCH rp.role
+    WHERE rp.permission.id = :permissionId ORDER BY rp.role.id
+    """)
+    List<RolePermission> findByPermissionIdWithRole(@Param("permissionId") Long permissionId);
+
+    long countByEffect(Effect effect);
 }
