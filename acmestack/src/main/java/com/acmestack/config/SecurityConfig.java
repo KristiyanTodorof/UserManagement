@@ -7,6 +7,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 
 @Configuration
 @EnableMethodSecurity
@@ -18,7 +19,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http, AppUserDetailsService userDetailsService) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/login").permitAll()
@@ -28,7 +29,8 @@ public class SecurityConfig {
                         .defaultSuccessUrl("/dashboard", true)
                         .permitAll())
                 .logout(logout -> logout
-                        .logoutSuccessUrl("/login?logout"));
+                        .logoutSuccessUrl("/login?logout"))
+                .addFilterBefore(new PermissionRefreshFilter(userDetailsService), AuthorizationFilter.class);
         return http.build();
     }
 }
