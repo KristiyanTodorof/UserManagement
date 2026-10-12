@@ -1,11 +1,13 @@
 package com.acmestack.user;
 
+import com.acmestack.role.RoleCount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
@@ -23,4 +25,22 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     long countByRoleNameAndStatusAndDeletedAtIsNull(String roleName, UserStatus status);
     long countByCreatedAtGreaterThanEqualAndDeletedAtIsNull(LocalDateTime from);
     long countByCreatedAtBetweenAndDeletedAtIsNull(LocalDateTime from, LocalDateTime to);
+
+    long countByRoleId(Long roleId);
+    long countByRoleIdAndDeletedAtIsNull(Long roleId);
+
+    List<User> findTop3ByRoleIdAndDeletedAtIsNullOrderByCreatedAtAsc(Long roleId);
+    List<User> findTop20ByRoleIdAndDeletedAtIsNullOrderByNameAsc(Long roleId);
+
+    @Query("""
+    SELECT new com.acmestack.role.RoleCount(u.role.id, COUNT(u))
+    FROM User u WHERE u.deletedAt IS NULL GROUP BY u.role.id
+    """)
+    List<RoleCount> countUsersPerRole();
+
+    @Query("""
+    SELECT u FROM User u JOIN FETCH u.role
+    WHERE u.deletedAt IS NULL AND u.role.id <> :roleId ORDER BY u.name
+    """)
+    List<User> findAssignable(@Param("roleId") Long roleId);
 }

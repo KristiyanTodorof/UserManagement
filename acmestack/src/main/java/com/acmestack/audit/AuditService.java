@@ -162,8 +162,12 @@ public class AuditService {
         }
     }
 
-    /** Typed input (like a mistyped email at login) must never overflow a column. */
     private static String cut(String s, int max) {
         return s == null || s.length() <= max ? s : s.substring(0, max);
+    }
+
+    @Transactional(readOnly = true)
+    public List<AuditLog> recentForTarget(String targetType, Long targetId) {
+        return repo.findForTarget(targetType, targetId, PageRequest.of(0, 10));
     }
 }

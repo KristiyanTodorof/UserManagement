@@ -198,4 +198,20 @@ public class UserService {
         for (int i = 0; i < 12; i++) sb.append(ALPHABET.charAt(random.nextInt(ALPHABET.length())));
         return sb.toString();
     }
+
+    @Transactional
+    public void changeRole(Long id, Long roleId, Long actingUserId) {
+        User u = get(id);
+        Role newRole = findRole(roleId);
+        if (u.getRole().getId().equals(newRole.getId())) return;
+        if (u.getId().equals(actingUserId)) {
+            throw new BusinessException("You can't change your own role.");
+        }
+        guardLastAdmin(u);
+
+        String oldRoleName = u.getRole().getName();
+        u.setRole(newRole);
+        audit.log(EventType.ROLE_CHANGED, "Changed role from " + oldRoleName + " to " + newRole.getName(),
+                "User", u.getId(), u.getName(), Map.of("from", oldRoleName, "to", newRole.getName()));
+    }
 }

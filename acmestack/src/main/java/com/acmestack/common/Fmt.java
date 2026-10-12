@@ -41,4 +41,17 @@ public class Fmt {
     public String dateTime(LocalDateTime t) {
         return t == null ? "—" : t.format(DateTimeFormatter.ofPattern("MMM d, yyyy, h:mm a", Locale.ENGLISH));
     }
+
+    public String categoryIcon(String category) {
+        return switch (category) {
+            case "User Management" -> "bi-people";
+            case "Role Management" -> "bi-shield";
+            case "Permission Management" -> "bi-file-earmark-text";
+            case "Billing" -> "bi-credit-card";
+            case "Audit Logs" -> "bi-clock-history";
+            case "Security" -> "bi-lock";
+            case "Reports" -> "bi-bar-chart";
+            default -> "bi-shield-check";
+        };
+    }
 }

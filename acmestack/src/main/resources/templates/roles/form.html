@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(${title}, ${active}, ~{::main})}">
+<body>
+<main class="content">
+    <h1 class="page-title" th:text="${title}">Create role</h1>
+    <p class="page-subtitle">New custom roles start with every permission denied. You grant them in the matrix.</p>
+
+    <div class="form-card">
+        <form th:action="${form.id == null} ? @{/roles} : @{/roles/{id}(id=${form.id})}"
+              th:object="${form}" method="post">
+
+            <div class="mb-3">
+                <label class="form-label">Name</label>
+                <input type="text" th:field="*{name}" class="form-control"
+                       th:readonly="${systemRole}"
+                       th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'">
+                <div class="form-text" th:if="${systemRole}">System roles can't be renamed.</div>
+                <div class="invalid-feedback" th:errors="*{name}"></div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea th:field="*{description}" rows="3" class="form-control"
+                          th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"></textarea>
+                <div class="invalid-feedback" th:errors="*{description}"></div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label d-block">Icon</label>
+                <div class="pick-row">
+                    <label class="pick" th:each="i : ${icons}">
+                        <input type="radio" th:field="*{icon}" th:value="${i}">
+                        <span class="role-icon indigo"><i th:class="'bi ' + ${i}"></i></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label d-block">Color</label>
+                <div class="pick-row">
+                    <label class="pick" th:each="c : ${colors}">
+                        <input type="radio" th:field="*{color}" th:value="${c}">
+                        <span class="swatch" th:classappend="${c}"></span>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a class="btn btn-outline-secondary" th:href="@{/roles}">Cancel</a>
+        </form>
+    </div>
+</main>
+</body>
+</html>

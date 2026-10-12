@@ -35,4 +35,11 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long>, JpaSp
         GROUP BY a.actorId, a.actorName ORDER BY a.actorName
         """)
     List<ActorOption> findActors();
+
+    @Query("""
+    SELECT a FROM AuditLog a
+    WHERE a.targetType = :type AND a.targetId = :id
+    ORDER BY a.createdAt DESC, a.id DESC
+    """)
+    List<AuditLog> findForTarget(@Param("type") String type, @Param("id") Long id, Pageable pageable);
 }

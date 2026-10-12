@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(${title}, ${active}, ~{::main})}">
+<body>
+<main class="content">
+    <h1 class="page-title">Assign users</h1>
+    <p class="page-subtitle">Select the users who should get the role
+        <strong th:text="${role.name}">Role</strong>.</p>
+
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+    <form th:action="@{/roles/{id}/assign(id=${role.id})}" method="post">
+        <div class="table-card mb-3">
+            <table class="table align-middle mb-0">
+                <thead><tr><th style="width:44px"></th><th>User</th><th>Current role</th><th>Status</th></tr></thead>
+                <tbody>
+                <tr th:each="u : ${candidates}">
+                    <td><input class="form-check-input" type="checkbox" name="userIds" th:value="${u.id}"></td>
+                    <td>
+                        <div class="user-cell">
+                            <div class="avatar" th:classappend="'av-' + ${@fmt.colorIndex(u.name)}"
+                                 th:text="${@fmt.initials(u.name)}">AB</div>
+                            <div>
+                                <div class="fw-semibold" th:text="${u.name}">Name</div>
+                                <small class="text-muted" th:text="${u.email}">email</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="pill role-pill" th:text="${u.role.name}">Role</span></td>
+                    <td><span class="pill" th:classappend="'st-' + ${#strings.toLowerCase(u.status)}"
+                              th:text="${#strings.capitalize(#strings.toLowerCase(u.status))}">Active</span></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(candidates)}">
+                    <td colspan="4" class="text-center text-muted py-4">Everyone already has this role.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <button type="submit" class="btn btn-primary">Assign selected users</button>
+        <a class="btn btn-outline-secondary" th:href="@{/roles}">Cancel</a>
+    </form>
+</main>
+</body>
+</html>

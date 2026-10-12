@@ -136,3 +136,40 @@ tr:hover .clickable { background: #f1f5ff; }
 .current-page { color: var(--muted); padding: 4px 8px; }
 .json { background: #0f172a; color: #e2e8f0; border-radius: 10px; padding: 12px;
     font-size: 12px; white-space: pre-wrap; word-break: break-all; margin: 0; }
+
+/* ---------- roles ---------- */
+.role-icon { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center;
+    font-size: 18px; flex-shrink: 0; }
+.role-icon.big { width: 64px; height: 64px; font-size: 28px; margin-bottom: 10px; }
+.role-icon.indigo { background: #e0e7ff; color: #4f46e5; }
+.role-icon.green  { background: #dcfce7; color: #16a34a; }
+.role-icon.blue   { background: #dbeafe; color: #2563eb; }
+.role-icon.orange { background: #ffedd5; color: #ea580c; }
+.role-icon.red    { background: #fee2e2; color: #dc2626; }
+.role-icon.gray   { background: #e2e8f0; color: #475569; }
+
+.type-system { background: #e0e7ff; color: #3730a3; }
+.type-custom { background: #dbeafe; color: #1d4ed8; }
+
+.desc-cell { max-width: 240px; }
+
+.avatar-stack { display: flex; align-items: center; }
+.avatar-stack .avatar { width: 30px; height: 30px; font-size: 11px; border: 2px solid #fff; margin-left: -8px; }
+.avatar-stack .avatar:first-child { margin-left: 0; }
+.avatar-stack .more { margin-left: 8px; color: var(--muted); font-size: 13px; }
+
+.panel-tabs { flex-wrap: wrap; gap: 6px 14px; }
+.panel-tabs a { font-size: 13px; }
+
+/* icon and colour pickers */
+.pick-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.pick input { display: none; }
+.pick .role-icon, .pick .swatch { cursor: pointer; border: 2px solid transparent; }
+.pick input:checked + .role-icon, .pick input:checked + .swatch { border-color: var(--primary); }
+.swatch { width: 32px; height: 32px; border-radius: 50%; display: block; }
+.swatch.indigo { background: #4f46e5; }
+.swatch.green  { background: #16a34a; }
+.swatch.blue   { background: #2563eb; }
+.swatch.orange { background: #ea580c; }
+.swatch.red    { background: #dc2626; }
+.swatch.gray   { background: #64748b; }

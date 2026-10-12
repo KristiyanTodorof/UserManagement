@@ -1,0 +1,110 @@
+<div th:fragment="panel" xmlns:th="http://www.thymeleaf.org"
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+    <button class="panel-close" type="button"
+            onclick="document.getElementById('panel').innerHTML=''"><i class="bi bi-x-lg"></i></button>
+
+    <div class="panel-head">
+        <div class="role-icon big" th:classappend="${r.color}"><i th:class="'bi ' + ${r.icon}"></i></div>
+        <h4 class="mb-1">
+            <span th:text="${r.name}">Admin</span>
+            <span class="pill" th:classappend="'type-' + ${#strings.toLowerCase(r.type)}"
+                  th:text="${#strings.capitalize(#strings.toLowerCase(r.type))}">System</span>
+        </h4>
+        <p class="text-muted mb-0" th:text="${r.description}">Description</p>
+    </div>
+
+    <div class="panel-actions">
+        <a class="btn btn-primary btn-sm" th:href="@{/roles/{id}/edit(id=${r.id})}"
+           sec:authorize="hasAuthority('role_management.edit')"><i class="bi bi-pencil"></i> Edit Role</a>
+        <form th:action="@{/roles/{id}/duplicate(id=${r.id})}" method="post"
+              sec:authorize="hasAuthority('role_management.create')">
+            <button class="btn btn-outline-secondary btn-sm"><i class="bi bi-copy"></i> Duplicate</button>
+        </form>
+        <a class="btn btn-outline-secondary btn-sm" th:href="@{/roles/{id}/assign(id=${r.id})}"
+           sec:authorize="hasAuthority('role_management.edit')"><i class="bi bi-person-plus"></i> Assign Users</a>
+    </div>
+
+    <div class="panel-tabs">
+        <a th:classappend="${tab == 'overview'} ? 'active'"
+           th:attr="hx-get=@{/roles/{id}/panel(id=${r.id},tab='overview')}" hx-target="#panel">Overview</a>
+        <a th:classappend="${tab == 'permissions'} ? 'active'"
+           th:attr="hx-get=@{/roles/{id}/panel(id=${r.id},tab='permissions')}" hx-target="#panel">Permissions</a>
+        <a th:classappend="${tab == 'users'} ? 'active'"
+           th:attr="hx-get=@{/roles/{id}/panel(id=${r.id},tab='users')}" hx-target="#panel">Assigned Users</a>
+        <a th:classappend="${tab == 'activity'} ? 'active'"
+           th:attr="hx-get=@{/roles/{id}/panel(id=${r.id},tab='activity')}" hx-target="#panel">Activity</a>
+    </div>
+
+    <!-- Overview -->
+    <div class="panel-body" th:if="${tab == 'overview'}">
+        <h6>Role Information</h6>
+        <dl class="detail-list">
+            <dt>Name</dt><dd th:text="${r.name}">Admin</dd>
+            <dt>Type</dt>
+            <dd><span class="pill" th:classappend="'type-' + ${#strings.toLowerCase(r.type)}"
+                      th:text="${#strings.capitalize(#strings.toLowerCase(r.type))}">System</span></dd>
+            <dt>Users</dt><dd th:text="${userCount}">0</dd>
+            <dt>Created</dt><dd th:text="${@fmt.date(r.createdAt)}">Jan 1, 2024</dd>
+            <dt>Updated</dt>
+            <dd><span th:text="${@fmt.ago(r.updatedAt)}">2 days ago</span>
+                <span class="text-muted" th:if="${r.updatedBy != null}" th:text="'by ' + ${r.updatedBy}"></span></dd>
+        </dl>
+
+        <h6 class="mt-4">Included Permissions
+            <span class="pill" th:text="${grantedTotal} + ' of ' + ${permTotal}">24 of 18</span></h6>
+        <div class="perm-row" th:each="g : ${groups}">
+            <span><i class="me-2" th:class="'bi me-2 ' + ${@fmt.categoryIcon(g.category())}"></i><span th:text="${g.category()}">Category</span></span>
+            <span class="pill" th:classappend="${g.granted() == g.items().size()} ? 'st-active' : (${g.granted() > 0} ? 'st-pending' : 'st-suspended')"
+                  th:text="${g.granted()} + ' of ' + ${g.items().size()}">2 of 5</span>
+        </div>
+    </div>
+
+    <!-- Permissions -->
+    <div class="panel-body" th:if="${tab == 'permissions'}">
+        <div class="mb-3" th:each="g : ${groups}">
+            <div class="fw-semibold mb-1">
+                <i th:class="'bi me-2 ' + ${@fmt.categoryIcon(g.category())}"></i><span th:text="${g.category()}">Category</span>
+            </div>
+            <div class="perm-row" th:each="rp : ${g.items()}">
+                <span th:text="${rp.permission.name}">View users</span>
+                <span class="pill"
+                      th:classappend="${rp.effect.name() == 'GRANTED'} ? 'st-active' : (${rp.effect.name() == 'LIMITED'} ? 'st-pending' : 'st-suspended')"
+                      th:text="${#strings.capitalize(#strings.toLowerCase(rp.effect))}">Granted</span>
+            </div>
+        </div>
+        <p class="text-muted small">Permissions are changed in the matrix on the Permissions page (Phase 6).</p>
+    </div>
+
+    <!-- Assigned users -->
+    <div class="panel-body" th:if="${tab == 'users'}">
+        <p class="text-muted" th:if="${#lists.isEmpty(members)}">No users have this role.</p>
+        <div class="feed-item" th:each="m : ${members}">
+            <div class="avatar" th:classappend="'av-' + ${@fmt.colorIndex(m.name)}"
+                 th:text="${@fmt.initials(m.name)}">AB</div>
+            <div class="flex-grow-1">
+                <div class="fw-semibold" th:text="${m.name}">Name</div>
+                <small class="text-muted" th:text="${m.email}">email</small>
+            </div>
+            <span class="pill align-self-center" th:classappend="'st-' + ${#strings.toLowerCase(m.status)}"
+                  th:text="${#strings.capitalize(#strings.toLowerCase(m.status))}">Active</span>
+        </div>
+        <p class="text-muted small mt-2" th:if="${userCount > #lists.size(members)}"
+           th:text="'and ' + (${userCount} - ${#lists.size(members)}) + ' more'"></p>
+    </div>
+
+    <!-- Activity -->
+    <div class="panel-body" th:if="${tab == 'activity'}">
+        <p class="text-muted" th:if="${#lists.isEmpty(events)}">No activity recorded for this role yet.</p>
+        <div class="feed-item" th:each="e : ${events}">
+            <div class="event-icon" th:classappend="'sev-' + ${#strings.toLowerCase(e.severity)}">
+                <i th:class="'bi ' + ${e.eventType.icon}"></i>
+            </div>
+            <div>
+                <div class="fw-semibold" th:text="${e.eventType.label}">Event</div>
+                <small class="text-muted" th:text="${e.description} + ' · ' + ${e.actorName}">Description</small>
+                <div><small class="text-muted" th:text="${@fmt.ago(e.createdAt)}">2 hours ago</small></div>
+            </div>
+        </div>
+    </div>
+</div>
