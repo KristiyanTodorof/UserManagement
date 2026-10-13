@@ -19,7 +19,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http, AppUserDetailsService userDetailsService) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http, AppUserDetailsService userDetailsService,
+                                    ActivityTracker tracker) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/login").permitAll()
@@ -30,7 +31,7 @@ public class SecurityConfig {
                         .permitAll())
                 .logout(logout -> logout
                         .logoutSuccessUrl("/login?logout"))
-                .addFilterBefore(new PermissionRefreshFilter(userDetailsService), AuthorizationFilter.class);
+                .addFilterBefore(new PermissionRefreshFilter(userDetailsService, tracker), AuthorizationFilter.class);
         return http.build();
     }
 }

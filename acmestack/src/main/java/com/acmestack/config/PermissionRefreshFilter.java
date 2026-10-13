@@ -18,9 +18,11 @@ import java.util.Optional;
 public class PermissionRefreshFilter extends OncePerRequestFilter {
 
     private final AppUserDetailsService users;
+    private final ActivityTracker tracker;
 
-    public PermissionRefreshFilter(AppUserDetailsService users) {
+    public PermissionRefreshFilter(AppUserDetailsService users, ActivityTracker tracker) {
         this.users = users;
+        this.tracker = this.tracker;
     }
 
     @Override
@@ -45,12 +47,14 @@ public class PermissionRefreshFilter extends OncePerRequestFilter {
 
                 String login = request.getContextPath() + "/login";
                 if ("true".equals(request.getHeader("HX-Request"))) {
-                    response.setHeader("HX-Redirect", login);   // htmx requests need this instead of a 302
+                    response.setHeader("HX-Redirect", login);
                 } else {
                     response.sendRedirect(login);
                 }
                 return;
             }
+
+            tracker.touch(fresh.get().getId());
 
             UsernamePasswordAuthenticationToken token = UsernamePasswordAuthenticationToken
                     .authenticated(fresh.get(), null, fresh.get().getAuthorities());
@@ -58,7 +62,7 @@ public class PermissionRefreshFilter extends OncePerRequestFilter {
 
             SecurityContext context = SecurityContextHolder.createEmptyContext();
             context.setAuthentication(token);
-            SecurityContextHolder.setContext(context);   // this request only; the session is untouched
+            SecurityContextHolder.setContext(context);
         }
         chain.doFilter(request, response);
     }
