@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(${title}, ${active}, ~{::main})}">
+<body>
+<main class="content">
+    <div class="users-layout">
+
+        <section class="users-main">
+            <h1 class="page-title">Permissions</h1>
+            <p class="page-subtitle">Control fine-grained access to features, data, and administrative actions.</p>
+
+            <div th:replace="~{permissions/stats :: stats}"></div>
+
+            <form id="filters" class="toolbar wrap" method="get" th:action="@{/permissions}">
+                <input type="text" name="q" th:value="${q}" class="form-control search-input"
+                       placeholder="Search permissions...">
+                <select name="category" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Categories</option>
+                    <option th:each="c : ${categories}" th:value="${c}" th:text="${c}"
+                            th:selected="${c == category}"></option>
+                </select>
+                <select name="roleId" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Roles</option>
+                    <option th:each="r : ${allRoles}" th:value="${r.id}" th:text="${r.name}"
+                            th:selected="${r.id == roleId}"></option>
+                </select>
+                <select name="review" class="form-select" onchange="this.form.submit()">
+                    <option value=""    th:selected="${review == ''}">All Reviews</option>
+                    <option value="due" th:selected="${review == 'due'}">Needs review</option>
+                    <option value="ok"  th:selected="${review == 'ok'}">Up to date</option>
+                </select>
+            </form>
+
+            <div th:replace="~{permissions/matrix :: matrix}"></div>
+        </section>
+
+        <aside id="panel" class="side-panel"></aside>
+    </div>
+</main>
+</body>
+</html>

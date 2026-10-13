@@ -42,4 +42,14 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long>, JpaSp
     ORDER BY a.createdAt DESC, a.id DESC
     """)
     List<AuditLog> findForTarget(@Param("type") String type, @Param("id") Long id, Pageable pageable);
+
+    List<AuditLog> findTop5ByEventTypeNotOrderByCreatedAtDescIdDesc(EventType type);
+    List<AuditLog> findTop3BySeverityOrderByCreatedAtDescIdDesc(Severity severity);
+
+    @Query("""
+    SELECT COUNT(a) FROM AuditLog a
+    WHERE a.severity = :severity AND a.createdAt >= :from AND a.createdAt < :to
+    """)
+    long countSeverityInRange(@Param("severity") Severity severity,
+                              @Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 }

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="matrix" id="matrix" class="table-card"
+     th:attr="hx-get=@{/permissions/matrix}" hx-trigger="matrixChanged from:body"
+     hx-include="#filters" hx-swap="outerHTML">
+    <div class="matrix-scroll">
+        <table class="table align-middle mb-0 matrix">
+            <thead>
+            <tr>
+                <th>Permission</th>
+                <th class="text-center" th:each="r : ${matrix.roles()}">
+                    <span class="role-icon sm" th:classappend="${r.color}"><i th:class="'bi ' + ${r.icon}"></i></span>
+                    <span th:text="${r.name}">Admin</span>
+                </th>
+            </tr>
+            </thead>
+
+            <tbody th:each="g : ${matrix.groups()}">
+            <tr class="group-row">
+                <td th:colspan="${#lists.size(matrix.roles()) + 1}">
+                    <i th:class="'bi me-2 ' + ${@fmt.categoryIcon(g.category())}"></i>
+                    <strong th:text="${g.category()}">Category</strong>
+                </td>
+            </tr>
+
+            <tr th:each="row : ${g.rows()}">
+                <td class="clickable perm-name"
+                    th:attr="hx-get=@{/permissions/{id}/panel(id=${row.permission().id})}"
+                    hx-target="#panel" hx-swap="innerHTML">
+                    <span th:text="${row.permission().name}">View users</span>
+                    <span class="pill st-pending ms-2" th:if="${row.reviewDue()}">Review</span>
+                </td>
+
+                <td class="text-center" th:each="c : ${row.cells()}">
+                    <th:block th:with="icon=${c.effect().name() == 'GRANTED' ? 'bi-check-lg' : (c.effect().name() == 'LIMITED' ? 'bi-dash-lg' : 'bi-x-lg')}">
+                        <button type="button" class="cell" th:if="${canEdit and !c.locked()}"
+                                th:classappend="${#strings.toLowerCase(c.effect())}"
+                                th:attr="hx-post=@{/permissions/{pid}/roles/{rid}(pid=${row.permission().id},rid=${c.roleId()})}"
+                                hx-swap="none" title="Click to change">
+                            <i th:class="'bi ' + ${icon}"></i>
+                        </button>
+                        <span class="cell static" th:unless="${canEdit and !c.locked()}"
+                              th:classappend="${#strings.toLowerCase(c.effect())}"
+                              th:title="${c.locked()} ? 'Admin always has every permission' : null">
+                <i th:class="'bi ' + ${icon}"></i>
+              </span>
+                    </th:block>
+                </td>
+            </tr>
+            </tbody>
+
+            <tbody th:if="${#lists.isEmpty(matrix.groups())}">
+            <tr><td th:colspan="${#lists.size(matrix.roles()) + 1}" class="text-center text-muted py-4">
+                No permissions match your filters.</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

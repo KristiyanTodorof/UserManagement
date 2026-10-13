@@ -1,0 +1,64 @@
+<div th:fragment="panel" xmlns:th="http://www.thymeleaf.org"
+     th:attr="hx-get=@{/permissions/{id}/panel(id=${p.id})}"
+     hx-trigger="matrixChanged from:body" hx-target="#panel" hx-swap="innerHTML">
+
+    <button class="panel-close" type="button"
+            onclick="document.getElementById('panel').innerHTML=''"><i class="bi bi-x-lg"></i></button>
+
+    <div class="panel-head">
+        <div class="role-icon big indigo"><i th:class="'bi ' + ${@fmt.categoryIcon(p.category)}"></i></div>
+        <h4 class="mb-1" th:text="${p.name}">View users</h4>
+        <code th:text="${p.key}">user_management.view</code>
+        <p class="text-muted mt-2 mb-0" th:text="${p.description}">Description</p>
+    </div>
+
+    <dl class="detail-list">
+        <dt>Category</dt><dd th:text="${p.category}">User Management</dd>
+        <dt>Resource</dt><dd th:text="${p.resource}">Users</dd>
+        <dt>Action</dt><dd th:text="${p.action}">View</dd>
+        <dt>Risk level</dt>
+        <dd><span class="pill" th:classappend="'sev-' + ${#strings.toLowerCase(p.riskLevel)}"
+                  th:text="${#strings.capitalize(#strings.toLowerCase(p.riskLevel))}">Low</span></dd>
+        <dt>Reviewed</dt>
+        <dd>
+            <span th:text="${@fmt.ago(p.lastReviewedAt)}">2 days ago</span>
+            <span class="pill st-pending ms-1" th:if="${reviewDue}">Review due</span>
+        </dd>
+    </dl>
+
+    <button type="button" class="btn btn-outline-secondary btn-sm mb-3" th:if="${canEdit}"
+            th:attr="hx-post=@{/permissions/{id}/review(id=${p.id})}" hx-swap="none">
+        <i class="bi bi-check2-circle"></i> Mark reviewed
+    </button>
+
+    <h6 class="mt-3">Role Access</h6>
+    <p class="text-muted small">Which roles can use this permission.</p>
+    <div class="access-row" th:each="a : ${access}">
+    <span class="d-flex align-items-center">
+      <span class="role-icon sm" th:classappend="${a.role().color}"><i th:class="'bi ' + ${a.role().icon}"></i></span>
+      <span th:text="${a.role().name}">Admin</span>
+      <span class="pill st-pending ms-2" th:if="${a.effect().name() == 'LIMITED'}">Limited</span>
+    </span>
+
+        <button type="button" class="switch" th:if="${canEdit and !a.locked()}"
+                th:classappend="${a.effect().name() == 'GRANTED'} ? 'on'"
+                th:attr="hx-post=@{/permissions/{pid}/roles/{rid}(pid=${p.id},rid=${a.role().id},effect=${a.effect().name() == 'GRANTED' ? 'DENIED' : 'GRANTED'})}"
+                hx-swap="none"></button>
+        <span class="switch static" th:unless="${canEdit and !a.locked()}"
+              th:classappend="${a.effect().name() == 'GRANTED'} ? 'on'"
+              th:title="${a.locked()} ? 'Admin always has every permission' : null"></span>
+    </div>
+
+    <h6 class="mt-4">Recent Activity</h6>
+    <p class="text-muted small" th:if="${#lists.isEmpty(events)}">No changes recorded yet.</p>
+    <div class="feed-item" th:each="e : ${events}">
+        <div class="event-icon" th:classappend="'sev-' + ${#strings.toLowerCase(e.severity)}">
+            <i th:class="'bi ' + ${e.eventType.icon}"></i>
+        </div>
+        <div>
+            <div class="fw-semibold" th:text="${e.actorName}">Actor</div>
+            <small class="text-muted" th:text="${e.description}">Description</small>
+            <div><small class="text-muted" th:text="${@fmt.ago(e.createdAt)}">2 hours ago</small></div>
+        </div>
+    </div>
+</div>

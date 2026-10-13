@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="stats" class="stat-grid"
+     th:attr="hx-get=@{/permissions/stats}" hx-trigger="matrixChanged from:body" hx-swap="outerHTML">
+
+    <div class="stat-card">
+        <div class="stat-icon indigo"><i class="bi bi-shield"></i></div>
+        <div>
+            <div class="stat-label">Total Permissions</div>
+            <div class="stat-value" th:text="${stats.total()}">0</div>
+            <div class="stat-note" th:text="'across ' + ${stats.categories()} + ' categories'"></div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon green"><i class="bi bi-check-circle"></i></div>
+        <div>
+            <div class="stat-label">Granted Rules</div>
+            <div class="stat-value" th:text="${stats.granted()}">0</div>
+            <div class="stat-note" th:text="${stats.grantedPct()} + '% of ' + ${stats.totalRules()} + ' rules'"></div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon red"><i class="bi bi-dash-circle"></i></div>
+        <div>
+            <div class="stat-label">Restricted Rules</div>
+            <div class="stat-value" th:text="${stats.denied()}">0</div>
+            <div class="stat-note"
+                 th:text="${stats.deniedPct()} + '% of total · ' + ${stats.limited()} + ' limited'"></div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon orange"><i class="bi bi-clock"></i></div>
+        <div>
+            <div class="stat-label">Pending Reviews</div>
+            <div class="stat-value" th:text="${stats.reviewsDue()}">0</div>
+            <div class="stat-note" th:text="${stats.reviewPct()} + '% not reviewed in 90 days'"></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

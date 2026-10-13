@@ -1,10 +1,9 @@
 package com.acmestack.user;
 
 import com.acmestack.role.RoleCount;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -43,4 +42,18 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     WHERE u.deletedAt IS NULL AND u.role.id <> :roleId ORDER BY u.name
     """)
     List<User> findAssignable(@Param("roleId") Long roleId);
+
+    long countByStatusAndLastActiveAtGreaterThanEqualAndDeletedAtIsNull(UserStatus status, LocalDateTime from);
+    long countByCreatedAtLessThanAndDeletedAtIsNull(LocalDateTime before);
+
+    @Query("SELECT u.createdAt FROM User u WHERE u.deletedAt IS NULL AND u.createdAt >= :from")
+    List<LocalDateTime> findCreatedAtSince(@Param("from") LocalDateTime from);
+
+    @EntityGraph(attributePaths = "role")
+    List<User> findTop5ByDeletedAtIsNullOrderByCreatedAtDescIdDesc();
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE User u SET u.lastActiveAt = :now WHERE u.id = :id")
+    void touch(@Param("id") Long id, @Param("now") LocalDateTime now);
 }
