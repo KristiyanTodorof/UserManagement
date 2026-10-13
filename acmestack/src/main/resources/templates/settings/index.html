@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(${title}, ${active}, ~{::main})}">
+<body>
+<main class="content">
+    <h1 class="page-title">Settings</h1>
+    <p class="page-subtitle">Configure workspace preferences, security options, notifications, and integrations.</p>
+
+    <div class="alert alert-success" th:if="${message}" th:text="${message}"></div>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+    <div class="alert alert-secondary" th:unless="${canEdit}">
+        You can view these settings but not change them.
+    </div>
+
+    <div class="settings-layout">
+
+        <!-- section menu -->
+        <nav class="sub-nav">
+            <a href="#general"><i class="bi bi-gear"></i> General</a>
+            <a href="#security"><i class="bi bi-shield-check"></i> Security</a>
+            <a href="#notifications"><i class="bi bi-bell"></i> Notifications</a>
+            <a th:href="@{/users}" sec:authorize="hasAuthority('user_management.view')"><i class="bi bi-people"></i> Team</a>
+            <a href="#integrations"><i class="bi bi-link-45deg"></i> Integrations</a>
+            <a href="#appearance"><i class="bi bi-palette"></i> Appearance</a>
+        </nav>
+
+        <!-- main column -->
+        <div class="settings-main">
+
+            <form id="settingsForm" th:action="@{/settings}" th:object="${form}" method="post">
+                <fieldset th:disabled="${!canEdit}">
+
+                    <section id="general" class="set-card">
+                        <h5><i class="bi bi-building me-2"></i>Workspace Settings</h5>
+                        <p class="text-muted small">Basic information about your workspace.</p>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Workspace Name</label>
+                                <input type="text" th:field="*{name}" class="form-control"
+                                       th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'">
+                                <div class="invalid-feedback" th:errors="*{name}"></div>
+                                <div class="form-text">This name is shown across the application.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Default Time Zone</label>
+                                <select th:field="*{timezone}" class="form-select">
+                                    <option th:each="z : ${zones}" th:value="${z.key}" th:text="${z.value}"></option>
+                                </select>
+                                <div class="form-text">Used to display dates and times across the application.</div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="security" class="set-card">
+                        <h5><i class="bi bi-shield-lock me-2"></i>Session &amp; Security</h5>
+                        <p class="text-muted small">Manage how your team accesses and stays secure.</p>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Session Timeout</label>
+                                <select th:field="*{sessionTimeoutMinutes}" class="form-select">
+                                    <option th:each="t : ${timeouts}" th:value="${t}"
+                                            th:text="${t < 60 ? t + ' minutes' : (t == 60 ? '1 hour' : (t / 60) + ' hours')}"></option>
+                                </select>
+                                <div class="form-text">Signs out inactive users. Applies to new sign-ins.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch"
+                                           id="twoFactorRequired" th:field="*{twoFactorRequired}">
+                                    <label class="form-check-label fw-semibold" for="twoFactorRequired">Require two-factor authentication</label>
+                                    <span class="pill st-pending ms-1">Policy only</span>
+                                </div>
+                                <div class="form-text">Records the policy. Enforcing 2FA at sign-in is not built in this project.</div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="notifications" class="set-card">
+                        <h5><i class="bi bi-bell me-2"></i>Notifications</h5>
+                        <p class="text-muted small">Choose what email notifications you and your team receive.</p>
+
+                        <div class="notif-row">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch"
+                                       id="emailNotifications" th:field="*{emailNotifications}">
+                                <label class="form-check-label fw-semibold" for="emailNotifications">Email Notifications</label>
+                                <div class="form-text">Receive important updates about your workspace.</div>
+                            </div>
+                            <select th:field="*{emailLevel}" class="form-select notif-select">
+                                <option th:each="l : ${emailLevels}" th:value="${l.key}" th:text="${l.value}"></option>
+                            </select>
+                        </div>
+
+                        <div class="notif-row">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch"
+                                       id="productUpdates" th:field="*{productUpdates}">
+                                <label class="form-check-label fw-semibold" for="productUpdates">Product Updates</label>
+                                <div class="form-text">Get the latest product news, feature releases and tips.</div>
+                            </div>
+                            <select th:field="*{productLevel}" class="form-select notif-select">
+                                <option th:each="l : ${productLevels}" th:value="${l.key}" th:text="${l.value}"></option>
+                            </select>
+                        </div>
+                        <div class="form-text">Preferences are saved. Sending real email is out of scope for this project.</div>
+                    </section>
+
+                    <section id="appearance" class="set-card">
+                        <h5><i class="bi bi-palette me-2"></i>Appearance</h5>
+                        <p class="text-muted small">Customize the look and feel of your workspace.</p>
+                        <div class="theme-row">
+                            <label class="theme-opt" th:each="t : ${themes}"
+                                   th:with="icon=${t == 'LIGHT' ? 'bi-sun' : (t == 'DARK' ? 'bi-moon' : 'bi-display')}">
+                                <input type="radio" th:field="*{theme}" th:value="${t}">
+                                <span class="theme-box">
+                  <i th:class="'bi ' + ${icon}"></i>
+                  <span th:text="${#strings.capitalize(#strings.toLowerCase(t))}">Light</span>
+                </span>
+                            </label>
+                        </div>
+                        <div class="form-text mt-2">Dark and System themes are saved now. Their styling arrives in Phase 9.</div>
+                    </section>
+
+                </fieldset>
+            </form>
+
+            <!-- integrations: outside the form, because each button is its own form -->
+            <section id="integrations" class="set-card">
+                <h5><i class="bi bi-link-45deg me-2"></i>Integrations</h5>
+                <p class="text-muted small">Connect your favorite tools. These are demo switches for now.</p>
+                <div class="int-grid">
+                    <div class="int-card" th:each="i : ${integrations}">
+                        <i class="bi int-icon" th:classappend="${i.icon}"></i>
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold" th:text="${i.name}">Slack</div>
+                            <small class="text-muted" th:text="${i.description}">Team communication</small>
+                        </div>
+                        <span class="pill st-active" th:if="${i.status.name() == 'CONNECTED'}">Connected</span>
+                        <form th:action="@{/settings/integrations/{id}/toggle(id=${i.id})}" method="post"
+                              sec:authorize="hasAuthority('settings.edit')">
+                            <button class="btn btn-sm"
+                                    th:classappend="${i.status.name() == 'CONNECTED'} ? 'btn-outline-secondary' : 'btn-outline-primary'"
+                                    th:text="${i.status.name() == 'CONNECTED'} ? 'Disconnect' : 'Connect'">Connect</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- right column -->
+        <aside class="settings-side">
+
+            <div class="set-card">
+                <div class="dcard-head">
+                    <h5 class="mb-0"><i class="bi bi-shield-check me-2"></i>Workspace Security</h5>
+                    <span class="pill" th:classappend="${secure} ? 'st-active' : 'st-pending'"
+                          th:text="${secure} ? 'Good' : 'Needs attention'">Good</span>
+                </div>
+                <p class="text-muted small"
+                   th:text="${secure} ? 'Your workspace is secure and all recommended settings are enabled.' : 'Some recommended settings are turned off.'"></p>
+                <div class="check-row" th:each="c : ${checks}">
+                    <i class="bi" th:classappend="${c.ok()} ? 'bi-check-circle-fill text-success' : 'bi-x-circle-fill text-danger'"></i>
+                    <span th:text="${c.label()}">Check</span>
+                </div>
+            </div>
+
+            <div class="set-card">
+                <div class="dcard-head">
+                    <h5 class="mb-0"><i class="bi bi-gem me-2 text-warning"></i>Current Plan</h5>
+                    <span class="pill role-pill" th:text="${ws.plan}">Pro</span>
+                </div>
+                <h4 th:text="'AcmeStack ' + ${ws.plan}">AcmeStack Pro</h4>
+                <p class="text-muted small">Advanced features for growing teams.</p>
+                <div class="check-row"><i class="bi bi-check-circle-fill text-success"></i> Up to 1,000 users</div>
+                <div class="check-row"><i class="bi bi-check-circle-fill text-success"></i> Advanced permissions</div>
+                <div class="check-row"><i class="bi bi-check-circle-fill text-success"></i> Audit logs &amp; activity history</div>
+                <div class="check-row"><i class="bi bi-check-circle-fill text-success"></i> Integrations with 20+ tools</div>
+                <button class="btn btn-outline-secondary w-100 mt-3" disabled
+                        title="Billing is not built in this project">Manage Billing</button>
+            </div>
+
+            <div class="set-card save-bar" th:if="${canEdit}">
+                <a class="btn btn-outline-secondary" th:href="@{/settings}">Cancel</a>
+                <button type="submit" form="settingsForm" class="btn btn-primary">Save Changes</button>
+            </div>
+        </aside>
+    </div>
+</main>
+</body>
+</html>

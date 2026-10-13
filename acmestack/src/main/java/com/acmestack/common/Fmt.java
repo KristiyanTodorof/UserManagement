@@ -1,14 +1,23 @@
 package com.acmestack.common;
 
+import com.acmestack.settings.SettingsService;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 @Component("fmt")
 public class Fmt {
+
+    private final SettingsService settings;
+
+    public Fmt(SettingsService settings) {
+        this.settings = settings;
+    }
 
     public String ago(LocalDateTime t) {
         if (t == null) return "Never";
@@ -24,7 +33,11 @@ public class Fmt {
     }
 
     public String date(LocalDateTime t) {
-        return t == null ? "—" : t.format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH));
+        return t == null ? "—" : local(t).format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH));
+    }
+
+    public String dateTime(LocalDateTime t) {
+        return t == null ? "—" : local(t).format(DateTimeFormatter.ofPattern("MMM d, yyyy, h:mm a", Locale.ENGLISH));
     }
 
     public String initials(String name) {
@@ -38,10 +51,6 @@ public class Fmt {
         return Math.floorMod(name.hashCode(), 6);
     }
 
-    public String dateTime(LocalDateTime t) {
-        return t == null ? "—" : t.format(DateTimeFormatter.ofPattern("MMM d, yyyy, h:mm a", Locale.ENGLISH));
-    }
-
     public String categoryIcon(String category) {
         return switch (category) {
             case "User Management" -> "bi-people";
@@ -53,5 +62,9 @@ public class Fmt {
             case "Reports" -> "bi-bar-chart";
             default -> "bi-shield-check";
         };
+    }
+
+    private ZonedDateTime local(LocalDateTime t) {
+        return t.atZone(ZoneId.systemDefault()).withZoneSameInstant(settings.current().zoneId());
     }
 }
