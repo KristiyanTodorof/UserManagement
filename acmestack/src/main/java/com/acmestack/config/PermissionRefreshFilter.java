@@ -22,7 +22,7 @@ public class PermissionRefreshFilter extends OncePerRequestFilter {
 
     public PermissionRefreshFilter(AppUserDetailsService users, ActivityTracker tracker) {
         this.users = users;
-        this.tracker = this.tracker;
+        this.tracker = tracker;
     }
 
     @Override

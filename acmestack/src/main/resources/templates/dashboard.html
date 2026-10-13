@@ -5,6 +5,237 @@
 <main class="content">
     <h1 class="page-title">Dashboard</h1>
     <p class="page-subtitle">Overview of your workspace, users, roles and activity.</p>
+
+    <!-- stat cards -->
+    <div class="stat-grid">
+        <div class="stat-card">
+            <div class="stat-icon blue"><i class="bi bi-people"></i></div>
+            <div>
+                <div class="stat-label">Total Users</div>
+                <div class="stat-value">
+                    <span th:text="${stats.total()}">0</span>
+                    <span class="trend" th:if="${stats.totalTrend() != null}" th:text="'↑ +' + ${stats.totalTrend()} + '%'"></span>
+                </div>
+                <div class="stat-note" th:text="'+' + ${stats.newThisWeek()} + ' from last week'"></div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon green"><i class="bi bi-lightning-charge"></i></div>
+            <div>
+                <div class="stat-label">Active Sessions</div>
+                <div class="stat-value" th:text="${stats.activeSessions()}">0</div>
+                <div class="stat-note">Active in the last 15 minutes</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon orange"><i class="bi bi-person-plus"></i></div>
+            <div>
+                <div class="stat-label">Pending Invites</div>
+                <div class="stat-value" th:text="${stats.pending()}">0</div>
+                <div class="stat-note">Awaiting first sign-in</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon indigo"><i class="bi bi-shield-exclamation"></i></div>
+            <div>
+                <div class="stat-label">Security Alerts</div>
+                <div class="stat-value">
+                    <span th:text="${stats.alerts()}">0</span>
+                    <span class="trend" th:if="${stats.alertTrend() != null}"
+                          th:classappend="${stats.alertTrend() > 0} ? 'bad'"
+                          th:text="${stats.alertTrend() >= 0 ? '↑ +' : '↓ '} + ${stats.alertTrend()} + '%'"></span>
+                </div>
+                <div class="stat-note"
+                     th:text="${stats.alerts() > 0} ? 'High severity, last 7 days' : 'All clear this week'"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- charts -->
+    <div class="dash-row top">
+        <div class="dcard">
+            <div class="dcard-head">
+                <div>
+                    <h5>User Growth</h5>
+                    <p class="text-muted small mb-0">Total users in your workspace over time.</p>
+                </div>
+                <form method="get" th:action="@{/dashboard}">
+                    <select name="days" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="7"  th:selected="${days == 7}">Last 7 days</option>
+                        <option value="30" th:selected="${days == 30}">Last 30 days</option>
+                        <option value="90" th:selected="${days == 90}">Last 90 days</option>
+                    </select>
+                </form>
+            </div>
+            <div class="chart-box"><canvas id="growthChart"></canvas></div>
+        </div>
+
+        <div class="dcard">
+            <div class="dcard-head">
+                <div>
+                    <h5>Role Distribution</h5>
+                    <p class="text-muted small mb-0">Breakdown of users by role.</p>
+                </div>
+            </div>
+            <div class="role-dist">
+                <div class="donut-box">
+                    <canvas id="roleChart"></canvas>
+                    <div class="donut-center">
+                        <strong th:text="${roleTotal}">0</strong>
+                        <small class="text-muted">Total Users</small>
+                    </div>
+                </div>
+                <ul class="legend">
+                    <li th:each="s : ${slices}">
+                        <span class="dot" th:style="'background:' + ${s.color()}"></span>
+                        <span class="lg-name" th:text="${s.name()}">Admin</span>
+                        <span class="lg-count" th:text="${s.count()}">0</span>
+                        <span class="lg-pct text-muted" th:text="${s.pct()} + '%'">0%</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- bottom row -->
+    <div class="dash-row bottom">
+
+        <div class="dcard" th:if="${events != null}">
+            <div class="dcard-head">
+                <div>
+                    <h5>Recent Activity</h5>
+                    <p class="text-muted small mb-0">Latest actions across your workspace.</p>
+                </div>
+                <a class="btn btn-sm btn-outline-primary" th:href="@{/activity}">View All</a>
+            </div>
+            <p class="text-muted small" th:if="${#lists.isEmpty(events)}">Nothing yet.</p>
+            <div class="feed-item" th:each="e : ${events}">
+                <div class="event-icon" th:classappend="'sev-' + ${#strings.toLowerCase(e.severity)}">
+                    <i th:class="'bi ' + ${e.eventType.icon}"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <div><strong th:text="${e.actorName}">Actor</strong>
+                        <span class="text-muted" th:text="${e.eventType.label}">Event</span></div>
+                    <small class="text-muted" th:text="${e.description}">Description</small>
+                </div>
+                <small class="text-muted text-nowrap" th:text="${@fmt.ago(e.createdAt)}">2 hours ago</small>
+            </div>
+        </div>
+
+        <div class="dcard" th:if="${recentUsers != null}">
+            <div class="dcard-head">
+                <div>
+                    <h5>Recently Added Users</h5>
+                    <p class="text-muted small mb-0">New team members in your workspace.</p>
+                </div>
+                <a class="btn btn-sm btn-outline-primary" th:href="@{/users}">View All</a>
+            </div>
+            <div class="feed-item" th:each="u : ${recentUsers}">
+                <div class="avatar" th:classappend="'av-' + ${@fmt.colorIndex(u.name)}"
+                     th:text="${@fmt.initials(u.name)}">AB</div>
+                <div class="flex-grow-1">
+                    <div class="fw-semibold" th:text="${u.name}">Name</div>
+                    <small class="text-muted" th:text="${u.email}">email</small>
+                </div>
+                <div class="text-end">
+                    <span class="pill role-pill" th:text="${u.role.name}">Role</span>
+                    <div><small class="text-muted" th:text="${@fmt.ago(u.createdAt)}">2 days ago</small></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stack">
+            <div class="dcard">
+                <div class="dcard-head">
+                    <div><h5>System Health</h5></div>
+                    <span class="pill" th:classappend="${health.operational()} ? 'st-active' : 'st-suspended'"
+                          th:text="${health.operational()} ? 'Operational' : 'Degraded'">Operational</span>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="ring" th:classappend="${health.operational()} ? '' : 'down'">
+                        <strong th:text="${health.uptime()}">3h 12m</strong>
+                        <small>Uptime</small>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="svc" th:each="s : ${health.services()}">
+              <span><span class="dot" th:style="${s.up()} ? 'background:#16a34a' : 'background:#dc2626'"></span>
+                    <span th:text="${s.name()}">Database</span></span>
+                            <small class="text-muted" th:text="${s.up()} ? 'Operational' : 'Down'">Operational</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dcard" th:if="${alerts != null}">
+                <div class="dcard-head">
+                    <div><h5>Recent Security Events</h5></div>
+                    <a class="btn btn-sm btn-outline-primary"
+                       th:href="@{/activity(severity='HIGH',period='all')}">View All</a>
+                </div>
+                <p class="text-muted small" th:if="${#lists.isEmpty(alerts)}">No high-severity events.</p>
+                <div class="feed-item" th:each="e : ${alerts}">
+                    <div class="event-icon sev-high"><i th:class="'bi ' + ${e.eventType.icon}"></i></div>
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold" th:text="${e.description}">Description</div>
+                        <small class="text-muted" th:text="${e.targetLabel} ?: '—'">target</small>
+                    </div>
+                    <small class="text-muted text-nowrap" th:text="${@fmt.ago(e.createdAt)}">2 hours ago</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script th:inline="javascript">
+        const growthLabels = /*[[${growth.labels()}]]*/ [];
+        const growthValues = /*[[${growth.values()}]]*/ [];
+        const sliceNames   = /*[[${sliceNames}]]*/ [];
+        const sliceCounts  = /*[[${sliceCounts}]]*/ [];
+        const sliceColors  = /*[[${sliceColors}]]*/ [];
+
+        new Chart(document.getElementById('growthChart'), {
+            type: 'line',
+            data: {
+                labels: growthLabels,
+                datasets: [{
+                    label: 'Users',
+                    data: growthValues,
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.10)',
+                    fill: true,
+                    tension: 0.35,
+                    pointRadius: growthLabels.length > 31 ? 0 : 3,
+                    pointBackgroundColor: '#2563eb'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { precision: 0 } },
+                    x: { grid: { display: false }, ticks: { maxTicksLimit: 8 } }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('roleChart'), {
+            type: 'doughnut',
+            data: {
+                labels: sliceNames,
+                datasets: [{ data: sliceCounts, backgroundColor: sliceColors, borderWidth: 2 }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '68%',
+                plugins: { legend: { display: false } }
+            }
+        });
+    </script>
 </main>
 </body>
 </html>

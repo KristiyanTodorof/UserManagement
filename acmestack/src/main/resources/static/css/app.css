@@ -203,3 +203,40 @@ button.cell:hover { transform: scale(1.12); }
 .switch.on { background: #16a34a; }
 .switch.on::after { left: 21px; }
 .switch.static { cursor: default; opacity: .6; }
+
+/* ---------- dashboard ---------- */
+.dash-row { display: grid; gap: 16px; margin-bottom: 16px; }
+.dash-row.top { grid-template-columns: 2fr 1.1fr; }
+.dash-row.bottom { grid-template-columns: repeat(3, 1fr); align-items: start; }
+
+.dcard { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 18px; min-width: 0; }
+.dcard-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+.dcard-head h5 { margin: 0; font-size: 18px; font-weight: 700; }
+.dcard-head .form-select { width: auto; }
+
+.chart-box { position: relative; height: 260px; }
+
+.role-dist { display: flex; align-items: center; gap: 20px; }
+.donut-box { position: relative; width: 180px; height: 180px; flex-shrink: 0; }
+.donut-center { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; pointer-events: none; }
+.donut-center strong { font-size: 28px; line-height: 1.1; }
+
+.legend { list-style: none; margin: 0; padding: 0; flex: 1; }
+.legend li { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 14px; }
+.legend .lg-name { flex: 1; }
+.legend .lg-count { font-weight: 600; min-width: 28px; text-align: right; }
+.legend .lg-pct { min-width: 40px; text-align: right; }
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+
+.stack { display: flex; flex-direction: column; gap: 16px; }
+
+.ring { width: 96px; height: 96px; border-radius: 50%; border: 8px solid #16a34a; flex-shrink: 0;
+    display: grid; place-content: center; text-align: center; }
+.ring.down { border-color: #dc2626; }
+.ring strong { font-size: 15px; line-height: 1.2; }
+.ring small { font-size: 11px; color: var(--muted); }
+.svc { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; font-size: 14px; }
+
+@media (max-width: 1200px) {
+    .dash-row.top, .dash-row.bottom { grid-template-columns: 1fr; }
+}
