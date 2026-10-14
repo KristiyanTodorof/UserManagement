@@ -1,3 +1,4 @@
+/* ================= Phase 0: base and layout ================= */
 :root {
     --sidebar-bg: #0f1f3d;
     --primary: #2563eb;
@@ -44,11 +45,12 @@ body { margin: 0; background: var(--bg); color: var(--text); font-family: system
 .page-title { font-size: 32px; font-weight: 700; margin: 0; }
 .page-subtitle { color: var(--muted); margin: 4px 0 24px; }
 
+/* ================= Phase 2: login ================= */
 .login-body { display: grid; place-items: center; min-height: 100vh; }
 .login-card { background: #fff; border: 1px solid var(--border); border-radius: 16px;
     padding: 36px; width: 100%; max-width: 400px; box-shadow: 0 10px 30px rgba(15,31,61,.08); }
 
-/* ---------- users page ---------- */
+/* ================= Phase 3: users page ================= */
 .users-layout { display: flex; gap: 24px; align-items: flex-start; }
 .users-main { flex: 1; min-width: 0; }
 
@@ -113,7 +115,7 @@ tr:hover .clickable { background: #f1f5ff; }
 
 .form-card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 28px; max-width: 520px; }
 
-/* ---------- activity ---------- */
+/* ================= Phase 4: activity ================= */
 .stat-icon.red { background: #fee2e2; color: #dc2626; }
 .trend.bad { color: #dc2626; }
 
@@ -137,7 +139,7 @@ tr:hover .clickable { background: #f1f5ff; }
 .json { background: #0f172a; color: #e2e8f0; border-radius: 10px; padding: 12px;
     font-size: 12px; white-space: pre-wrap; word-break: break-all; margin: 0; }
 
-/* ---------- roles ---------- */
+/* ================= Phase 5: roles ================= */
 .role-icon { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center;
     font-size: 18px; flex-shrink: 0; }
 .role-icon.big { width: 64px; height: 64px; font-size: 28px; margin-bottom: 10px; }
@@ -174,7 +176,7 @@ tr:hover .clickable { background: #f1f5ff; }
 .swatch.red    { background: #dc2626; }
 .swatch.gray   { background: #64748b; }
 
-/* ---------- permissions ---------- */
+/* ================= Phase 6: permissions ================= */
 .stat-icon.orange { background: #ffedd5; color: #ea580c; }
 
 .matrix-scroll { overflow-x: auto; }
@@ -204,7 +206,7 @@ button.cell:hover { transform: scale(1.12); }
 .switch.on::after { left: 21px; }
 .switch.static { cursor: default; opacity: .6; }
 
-/* ---------- dashboard ---------- */
+/* ================= Phase 7: dashboard ================= */
 .dash-row { display: grid; gap: 16px; margin-bottom: 16px; }
 .dash-row.top { grid-template-columns: 2fr 1.1fr; }
 .dash-row.bottom { grid-template-columns: repeat(3, 1fr); align-items: start; }
@@ -241,7 +243,7 @@ button.cell:hover { transform: scale(1.12); }
     .dash-row.top, .dash-row.bottom { grid-template-columns: 1fr; }
 }
 
-/* ---------- settings ---------- */
+/* ================= Phase 8: settings ================= */
 html { scroll-behavior: smooth; }
 
 .settings-layout { display: grid; grid-template-columns: 190px minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
@@ -280,4 +282,157 @@ html { scroll-behavior: smooth; }
 @media (max-width: 1300px) {
     .settings-layout { grid-template-columns: 1fr; }
     .sub-nav { flex-direction: row; flex-wrap: wrap; position: static; }
+}
+
+/* ================= Phase 9: styling pass ================= */
+
+:root { --surface: #ffffff; --surface-2: #f8fafc; --hover: #f1f5ff; }
+
+body { font-family: "Inter", system-ui, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.htmx-request { opacity: .55; transition: opacity .2s; }
+
+/* ----- surfaces use variables, so dark mode only has to change the variables ----- */
+.topbar, .stat-card, .table-card, .side-panel, .form-card, .login-card, .dcard, .set-card, .sub-nav {
+    background: var(--surface);
+}
+.table-card th, .matrix .group-row td { background: var(--surface-2); }
+tr:hover .clickable { background: var(--hover); }
+.clickable-row:hover { --bs-table-bg: var(--hover); }
+.sub-nav a:hover { background: var(--hover); }
+.avatar-stack .avatar { border-color: var(--surface); }
+.search { margin: 0; }
+.search input { color: var(--text); }
+
+.stat-card, .table-card, .dcard, .set-card, .side-panel, .form-card {
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 4px 14px rgba(15, 23, 42, .04);
+}
+
+/* ----- sidebar ----- */
+.sidebar { background: linear-gradient(180deg, #0f1f3d 0%, #0a1630 100%); }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand i { font-size: 24px; }
+.sidebar nav a { transition: background .15s; }
+.sidebar nav a.active { box-shadow: 0 4px 12px rgba(37, 99, 235, .35); }
+.upgrade { background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(59,130,246,.2));
+    border: 1px solid rgba(255,255,255,.08); }
+
+/* ----- top bar ----- */
+.topbar { position: sticky; top: 0; z-index: 20; }
+.topbar-right { margin-left: auto; }
+.icon-btn { color: inherit; text-decoration: none; font-size: 19px; }
+.icon-btn:hover { color: var(--primary); }
+.menu-btn { display: none; border: 0; background: none; font-size: 26px; color: var(--text); padding: 0; }
+.nav-backdrop { display: none; }
+
+/* sticky panels sit below the sticky top bar and scroll on their own */
+.side-panel { top: 88px; max-height: calc(100vh - 108px); overflow-y: auto; }
+.sub-nav { top: 88px; }
+
+/* ----- status dots on pills ----- */
+.st-active::before, .st-pending::before, .st-suspended::before {
+    content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    background: currentColor; margin-right: 6px; vertical-align: 1px;
+}
+
+/* ----- login and message pages ----- */
+.login-body { background: radial-gradient(circle at 20% 10%, rgba(37,99,235,.12), transparent 45%), var(--bg); padding: 16px; }
+.login-brand { display: flex; align-items: center; justify-content: center; gap: 10px;
+    font-size: 22px; font-weight: 700; margin-bottom: 24px; color: var(--text); }
+.brand-mark { width: 40px; height: 40px; border-radius: 12px; background: var(--primary); color: #fff;
+    display: grid; place-items: center; font-size: 20px; }
+.state-icon { width: 56px; height: 56px; border-radius: 16px; background: #fee2e2; color: #dc2626;
+    display: grid; place-items: center; font-size: 26px; margin: 0 auto 14px; }
+
+/* ================= dark mode ================= */
+[data-bs-theme="dark"] {
+    --bg: #0b1220; --text: #e5e7eb; --muted: #94a3b8; --border: #243049;
+    --surface: #111a2e; --surface-2: #0f172a; --hover: #16213a;
+    --bs-body-bg: #0b1220; --bs-body-color: #e5e7eb; --bs-border-color: #243049;
+}
+[data-bs-theme="dark"] .table { --bs-table-bg: transparent; }
+[data-bs-theme="dark"] .stat-card, [data-bs-theme="dark"] .table-card,
+[data-bs-theme="dark"] .dcard, [data-bs-theme="dark"] .set-card,
+[data-bs-theme="dark"] .side-panel, [data-bs-theme="dark"] .form-card { box-shadow: none; }
+[data-bs-theme="dark"] .login-body { background: radial-gradient(circle at 20% 10%, rgba(37,99,235,.18), transparent 45%), var(--bg); }
+
+/* pills: the base first, then the variants, because they have the same specificity */
+[data-bs-theme="dark"] .pill { background: #1e293b; color: #cbd5e1; }
+[data-bs-theme="dark"] .role-pill, [data-bs-theme="dark"] .type-system { background: #312e81; color: #c7d2fe; }
+[data-bs-theme="dark"] .type-custom { background: #1e3a8a; color: #bfdbfe; }
+[data-bs-theme="dark"] .st-active { background: #14532d; color: #bbf7d0; }
+[data-bs-theme="dark"] .st-pending { background: #78350f; color: #fde68a; }
+[data-bs-theme="dark"] .st-suspended { background: #7f1d1d; color: #fecaca; }
+
+/* event icons and severities */
+[data-bs-theme="dark"] .event-icon { background: #1e2a4a; color: #a5b4fc; }
+[data-bs-theme="dark"] .sev-low { background: #1e3a8a; color: #bfdbfe; }
+[data-bs-theme="dark"] .sev-medium { background: #7c2d12; color: #fed7aa; }
+[data-bs-theme="dark"] .sev-high { background: #7f1d1d; color: #fecaca; }
+
+/* stat and role icons */
+[data-bs-theme="dark"] .stat-icon.blue,   [data-bs-theme="dark"] .role-icon.blue   { background: rgba(37,99,235,.22);  color: #93c5fd; }
+[data-bs-theme="dark"] .stat-icon.green,  [data-bs-theme="dark"] .role-icon.green  { background: rgba(22,163,74,.22);  color: #86efac; }
+[data-bs-theme="dark"] .stat-icon.indigo, [data-bs-theme="dark"] .role-icon.indigo { background: rgba(99,102,241,.25); color: #c7d2fe; }
+[data-bs-theme="dark"] .stat-icon.sky     { background: rgba(2,132,199,.22);  color: #7dd3fc; }
+[data-bs-theme="dark"] .stat-icon.red,    [data-bs-theme="dark"] .role-icon.red    { background: rgba(220,38,38,.22);  color: #fca5a5; }
+[data-bs-theme="dark"] .stat-icon.orange, [data-bs-theme="dark"] .role-icon.orange { background: rgba(234,88,12,.22);  color: #fdba74; }
+[data-bs-theme="dark"] .role-icon.gray    { background: rgba(148,163,184,.2); color: #cbd5e1; }
+
+/* avatars */
+[data-bs-theme="dark"] .av-0 { background: #312e81; color: #c7d2fe; }
+[data-bs-theme="dark"] .av-1 { background: #14532d; color: #bbf7d0; }
+[data-bs-theme="dark"] .av-2 { background: #78350f; color: #fde68a; }
+[data-bs-theme="dark"] .av-3 { background: #7f1d1d; color: #fecaca; }
+[data-bs-theme="dark"] .av-4 { background: #0c4a6e; color: #bae6fd; }
+[data-bs-theme="dark"] .av-5 { background: #581c87; color: #e9d5ff; }
+
+/* matrix, switches, misc */
+[data-bs-theme="dark"] .cell.granted { background: rgba(22,163,74,.22);  color: #4ade80; }
+[data-bs-theme="dark"] .cell.denied  { background: rgba(220,38,38,.22);  color: #f87171; }
+[data-bs-theme="dark"] .cell.limited { background: rgba(148,163,184,.2); color: #cbd5e1; }
+[data-bs-theme="dark"] .switch { background: #334155; }
+[data-bs-theme="dark"] .switch.on { background: #16a34a; }
+[data-bs-theme="dark"] .info-note { background: rgba(37,99,235,.15); color: #93c5fd; }
+[data-bs-theme="dark"] .theme-opt input:checked + .theme-box { background: rgba(37,99,235,.18); }
+[data-bs-theme="dark"] .state-icon { background: rgba(220,38,38,.22); color: #fca5a5; }
+[data-bs-theme="dark"] .pager-links a.active { color: #fff; }
+
+/* ================= responsive ================= */
+@media (max-width: 1200px) {
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 991.98px) {
+    .menu-btn { display: inline-block; }
+
+    .sidebar { position: fixed; left: 0; top: 0; bottom: 0; height: auto; z-index: 60;
+        transform: translateX(-100%); transition: transform .2s; }
+    body.nav-open .sidebar { transform: none; }
+    .nav-backdrop { position: fixed; inset: 0; background: rgba(15, 23, 42, .5); z-index: 55; }
+    body.nav-open .nav-backdrop { display: block; }
+
+    .topbar { padding: 0 14px; gap: 12px; }
+    .search { width: auto; flex: 1; }
+    .me-text { display: none; }
+    .content { padding: 18px 14px; }
+    .page-title { font-size: 26px; }
+
+    .users-layout { flex-direction: column; }
+    .users-main { width: 100%; }
+    .side-panel { position: fixed; inset: 0; width: auto; max-height: none; z-index: 70;
+        border-radius: 0; padding-top: 52px; overflow-y: auto; }
+
+    .toolbar { flex-wrap: wrap; }
+    .toolbar input[type=text], .toolbar .form-select { flex: 1 1 140px; width: auto; }
+    .table-card { overflow-x: auto; }
+    .table-card table { min-width: 640px; }
+    .notif-row { flex-direction: column; align-items: flex-start; }
+    .notif-select { width: 100%; }
+}
+
+@media (max-width: 575.98px) {
+    .stat-grid { grid-template-columns: 1fr; }
+    .role-dist { flex-direction: column; }
+    .panel-actions .btn { flex: 1 1 auto; }
 }

@@ -20,14 +20,14 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http, AppUserDetailsService userDetailsService,
-                                    ActivityTracker tracker) throws Exception {
+                                    ActivityTracker tracker, LandingSuccessHandler landing) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/login").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/dashboard", true)
+                        .successHandler(landing)
                         .permitAll())
                 .logout(logout -> logout
                         .logoutSuccessUrl("/login?logout"))

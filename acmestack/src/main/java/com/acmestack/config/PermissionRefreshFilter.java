@@ -28,7 +28,7 @@ public class PermissionRefreshFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return path.startsWith("/css/") || path.startsWith("/js/") || path.startsWith("/images/");
+        return path.startsWith("/static/css/") || path.startsWith("/static/js/") || path.startsWith("/images/");
     }
 
     @Override

@@ -226,7 +226,8 @@
             type: 'doughnut',
             data: {
                 labels: sliceNames,
-                datasets: [{ data: sliceCounts, backgroundColor: sliceColors, borderWidth: 2 }]
+                datasets: [{ data: sliceCounts, backgroundColor: sliceColors, borderWidth: 2,
+                    borderColor: dark ? '#111a2e' : '#ffffff' }]
             },
             options: {
                 responsive: true,
