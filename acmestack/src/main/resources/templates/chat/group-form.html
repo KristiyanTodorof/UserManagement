@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(${title}, ${active}, ~{::main})}">
+<body>
+<main class="content">
+    <a class="small text-muted text-decoration-none" th:href="@{/chat}">← Back to chat</a>
+    <h1 class="page-title">New group</h1>
+    <p class="page-subtitle">Name the group and choose who is in it.</p>
+
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+    <div class="form-card">
+        <form th:action="@{/chat/groups}" method="post">
+            <div class="mb-3">
+                <label class="form-label" for="name">Group name</label>
+                <input type="text" id="name" name="name" class="form-control" maxlength="60" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label d-block">Icon</label>
+                <div class="pick-row">
+                    <label class="pick" th:each="i, st : ${icons}">
+                        <input type="radio" name="icon" th:value="${i}" th:checked="${st.first}">
+                        <span class="role-icon indigo"><i th:class="'bi ' + ${i}"></i></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label d-block">Color</label>
+                <div class="pick-row">
+                    <label class="pick" th:each="c, st : ${colors}">
+                        <input type="radio" name="color" th:value="${c}" th:checked="${c == 'blue'}">
+                        <span class="swatch" th:classappend="${c}"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label d-block">Members</label>
+                <label class="member-row" th:each="u : ${candidates}">
+                    <input class="form-check-input" type="checkbox" name="memberIds" th:value="${u.id}">
+                    <div class="avatar sm" th:classappend="'av-' + ${@fmt.colorIndex(u.name)}"
+                         th:text="${@fmt.initials(u.name)}">AB</div>
+                    <span class="flex-grow-1" th:text="${u.name}">Name</span>
+                    <span class="pill role-pill" th:text="${u.role.name}">Role</span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create group</button>
+            <a class="btn btn-outline-secondary" th:href="@{/chat}">Cancel</a>
+        </form>
+    </div>
+</main>
+</body>
+</html>

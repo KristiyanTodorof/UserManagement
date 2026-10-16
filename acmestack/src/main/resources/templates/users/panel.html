@@ -17,6 +17,11 @@
     </div>
 
     <div class="panel-actions">
+        <form th:action="@{/chat/direct/{id}(id=${u.id})}" method="post"
+              th:unless="${self}" sec:authorize="hasAuthority('chat.use')">
+            <button class="btn btn-outline-secondary btn-sm"><i class="bi bi-chat-dots"></i> Message</button>
+        </form>
+
         <a class="btn btn-primary btn-sm" th:href="@{/users/{id}/edit(id=${u.id})}"
            sec:authorize="hasAuthority('user_management.edit')"><i class="bi bi-pencil"></i> Edit User</a>
 

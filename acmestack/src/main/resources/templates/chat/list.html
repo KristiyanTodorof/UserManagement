@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="list" id="convlist" class="conv-list"
+     th:attr="hx-get=@{/chat/list(c=${activeId},filter=${filter},q=${q})}"
+     hx-trigger="every 5s [chatActive()], messageSent from:body" hx-swap="outerHTML">
+
+    <a class="conv" th:each="r : ${rows}"
+       th:href="@{/chat(c=${r.conversation().id},filter=${filter},q=${q})}"
+       th:classappend="${r.conversation().id == activeId} ? 'active'">
+        <div class="avatar-wrap">
+            <div class="avatar" th:if="${r.conversation().type.name() == 'DIRECT'}"
+                 th:classappend="'av-' + ${@fmt.colorIndex(r.title())}"
+                 th:text="${@fmt.initials(r.title())}">AB</div>
+            <div class="role-icon" th:unless="${r.conversation().type.name() == 'DIRECT'}"
+                 th:classappend="${r.conversation().color}">
+                <i th:class="'bi ' + ${r.conversation().icon}"></i></div>
+            <span class="online-dot" th:if="${r.online()}"></span>
+        </div>
+        <div class="conv-body">
+            <div class="conv-top">
+                <span class="conv-title" th:text="${r.title()}">Name</span>
+                <small class="text-muted text-nowrap" th:if="${r.conversation().lastMessageAt != null}"
+                       th:text="${@fmt.ago(r.conversation().lastMessageAt)}">2 min ago</small>
+            </div>
+            <div class="conv-bottom">
+                <span class="conv-preview" th:text="${r.preview()}">Preview</span>
+                <i class="bi bi-bell-slash text-muted" th:if="${r.muted()}"></i>
+                <span class="badge-count" th:classappend="${r.muted()} ? 'muted'"
+                      th:if="${r.unread() > 0 and r.conversation().id != activeId}"
+                      th:text="${r.unread() > 99 ? '99+' : r.unread()}">2</span>
+            </div>
+        </div>
+    </a>
+
+    <p class="text-muted small p-3 mb-0" th:if="${#lists.isEmpty(rows)}">No conversations found.</p>
+</div>
+</body>
+</html>

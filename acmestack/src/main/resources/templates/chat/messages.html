@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="batch">
+
+    <div class="msg" th:each="m : ${messages}" th:id="'msg-' + ${m.id}"
+         th:classappend="${m.sender.id == meId} ? 'mine'">
+        <div class="avatar sm" th:classappend="'av-' + ${@fmt.colorIndex(m.sender.name)}"
+             th:text="${@fmt.initials(m.sender.name)}" th:title="${m.sender.name}">AB</div>
+
+        <div class="msg-body">
+            <div class="bubble">
+                <div class="msg-sender" th:text="${m.sender.name}">Name</div>
+                <div class="msg-text" th:if="${!#strings.isEmpty(m.body)}" th:text="${m.body}">Hello</div>
+
+                <th:block th:if="${m.attachmentName != null}">
+                    <a th:if="${@fmt.isImage(m.attachmentName)}" th:href="@{/chat/files/{id}(id=${m.id})}"
+                       target="_blank" rel="noopener">
+                        <img class="chat-img" th:src="@{/chat/files/{id}(id=${m.id})}"
+                             th:alt="${m.attachmentName}" loading="lazy">
+                    </a>
+                    <a th:unless="${@fmt.isImage(m.attachmentName)}" class="file-card"
+                       th:href="@{/chat/files/{id}(id=${m.id})}">
+            <span class="role-icon" th:classappend="${@fmt.fileColor(m.attachmentName)}">
+              <i th:class="'bi ' + ${@fmt.fileIcon(m.attachmentName)}"></i></span>
+                        <span class="file-meta">
+              <span class="fw-semibold" th:text="${m.attachmentName}">file.pdf</span>
+              <small class="text-muted" th:text="${@fmt.fileSize(m.attachmentSize)}">4 MB</small>
+            </span>
+                        <i class="bi bi-download"></i>
+                    </a>
+                </th:block>
+            </div>
+            <small class="msg-time text-muted" th:text="${@fmt.chatTime(m.createdAt)}">9:14 AM</small>
+        </div>
+    </div>
+
+    <div id="poller"
+         th:attr="hx-get=@{/chat/{id}/messages(id=${activeId},after=${after})}"
+         hx-trigger="every 3s [chatActive()], messageSent from:body" hx-swap="outerHTML"></div>
+</th:block>
+</body>
+</html>

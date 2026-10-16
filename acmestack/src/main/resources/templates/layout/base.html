@@ -46,6 +46,8 @@
                sec:authorize="hasAuthority('reports.view')"><i class="bi bi-house"></i> Dashboard</a>
             <a th:href="@{/users}" th:classappend="${active == 'users'} ? 'active'"
                sec:authorize="hasAuthority('user_management.view')"><i class="bi bi-people"></i> Users</a>
+            <a th:href="@{/chat}" th:classappend="${active == 'chat'} ? 'active'"
+               sec:authorize="hasAuthority('chat.use')"><i class="bi bi-chat-dots"></i> Chat</a>
             <a th:href="@{/roles}" th:classappend="${active == 'roles'} ? 'active'"
                sec:authorize="hasAuthority('role_management.view')"><i class="bi bi-shield"></i> Roles</a>
             <a th:href="@{/permissions}" th:classappend="${active == 'permissions'} ? 'active'"

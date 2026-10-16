@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layout/base :: layout(${title}, ${active}, ~{::main})}">
+<body>
+<main class="content">
+    <h1 class="page-title">Team Chat</h1>
+    <p class="page-subtitle">Communicate with your team members.</p>
+
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+    <div class="chat-layout" id="chatLayout">
+
+        <!-- ===== conversations ===== -->
+        <section class="chat-col chat-list-col">
+            <form class="chat-search" method="get" th:action="@{/chat}">
+                <input type="hidden" name="c" th:if="${activeId != null}" th:value="${activeId}">
+                <input type="hidden" name="filter" th:value="${filter}">
+                <i class="bi bi-search"></i>
+                <input type="text" name="q" th:value="${q}" placeholder="Search conversations..." aria-label="Search conversations">
+            </form>
+
+            <div class="chat-actions">
+                <a class="btn btn-primary btn-sm flex-fill" th:href="@{/chat/new}"><i class="bi bi-plus-lg"></i> New chat</a>
+                <a class="btn btn-outline-secondary btn-sm flex-fill" th:href="@{/chat/groups/new}" th:if="${canGroups}">
+                    <i class="bi bi-people"></i> New group</a>
+            </div>
+
+            <div class="chat-tabs">
+                <a th:each="f : ${filters}" th:text="${f.value}"
+                   th:href="@{/chat(c=${activeId},filter=${f.key},q=${q})}"
+                   th:classappend="${filter == f.key} ? 'active'">All</a>
+            </div>
+
+            <div th:replace="~{chat/list :: list}"></div>
+        </section>
+
+        <!-- ===== thread ===== -->
+        <section class="chat-col chat-thread-col">
+            <th:block th:if="${current != null}">
+                <header class="chat-head">
+                    <div class="avatar-wrap">
+                        <div class="avatar" th:if="${current.conversation().type.name() == 'DIRECT'}"
+                             th:classappend="'av-' + ${@fmt.colorIndex(current.title())}"
+                             th:text="${@fmt.initials(current.title())}">AB</div>
+                        <div class="role-icon" th:unless="${current.conversation().type.name() == 'DIRECT'}"
+                             th:classappend="${current.conversation().color}">
+                            <i th:class="'bi ' + ${current.conversation().icon}"></i></div>
+                        <span class="online-dot" th:if="${current.online()}"></span>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold" th:text="${current.title()}">Name</div>
+                        <small class="text-muted" th:if="${current.conversation().type.name() == 'DIRECT'}"
+                               th:text="${current.online()} ? 'Active now' : 'Last active: ' + ${@fmt.ago(current.other().lastActiveAt)}">Active now</small>
+                        <small class="text-muted" th:if="${current.conversation().type.name() == 'GROUP'}"
+                               th:text="${#lists.size(members)} + ' members'">3 members</small>
+                    </div>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleChatInfo()"
+                            title="Show or hide details"><i class="bi bi-layout-sidebar-inset-reverse"></i></button>
+                </header>
+
+                <div id="messages" class="chat-messages"
+                     th:classappend="${current.conversation().type.name() == 'DIRECT'} ? 'direct'">
+                    <th:block th:replace="~{chat/messages :: batch}"></th:block>
+                </div>
+
+                <form id="composer" class="composer" method="post" th:action="@{/chat/{id}/send(id=${activeId})}"
+                      th:attr="hx-post=@{/chat/{id}/send(id=${activeId})}"
+                      hx-encoding="multipart/form-data" hx-swap="none" autocomplete="off">
+                    <label class="attach-btn" for="chatFile" title="Attach a file (max 5 MB)"><i class="bi bi-paperclip"></i></label>
+                    <input type="file" id="chatFile" name="file" hidden th:accept="${accept}">
+                    <span id="fileName" class="text-muted"></span>
+                    <input type="text" name="body" class="form-control" maxlength="2000"
+                           placeholder="Type a message..." aria-label="Message">
+                    <button type="submit" class="btn btn-primary send-btn" title="Send"><i class="bi bi-send-fill"></i></button>
+                </form>
+            </th:block>
+
+            <div class="chat-empty" th:if="${current == null}">
+                <i class="bi bi-chat-dots" style="font-size:42px"></i>
+                <h5 class="mt-2">No conversations yet</h5>
+                <p>Start one with the <strong>New chat</strong> button.</p>
+            </div>
+        </section>
+
+        <!-- ===== details ===== -->
+        <aside class="chat-col chat-info-col" th:if="${current != null}">
+            <button class="panel-close" type="button" onclick="toggleChatInfo()"><i class="bi bi-x-lg"></i></button>
+
+            <!-- direct: the other person -->
+            <th:block th:if="${current.conversation().type.name() == 'DIRECT'}" th:with="other=${current.other()}">
+                <div class="panel-head">
+                    <div class="avatar big" th:classappend="'av-' + ${@fmt.colorIndex(other.name)}"
+                         th:text="${@fmt.initials(other.name)}">AB</div>
+                    <h4 class="mb-1" th:text="${other.name}">Name</h4>
+                    <span class="pill" th:classappend="'st-' + ${#strings.toLowerCase(other.status)}"
+                          th:text="${#strings.capitalize(#strings.toLowerCase(other.status))}">Active</span>
+                    <div class="mt-2">
+                        <span class="pill role-pill" th:text="${other.role.name}">Role</span>
+                        <span class="text-muted ms-1">· Joined <span th:text="${@fmt.date(other.createdAt)}"></span></span>
+                    </div>
+                </div>
+                <a class="btn btn-primary btn-sm w-100 mb-3" th:href="@{/users(q=${other.email})}"
+                   sec:authorize="hasAuthority('user_management.view')">View Profile</a>
+                <dl class="detail-list">
+                    <dt>Email</dt><dd th:text="${other.email}" style="overflow-wrap:anywhere">email</dd>
+                    <dt>Last active</dt><dd th:text="${@fmt.ago(other.lastActiveAt)}">2 hours ago</dd>
+                </dl>
+            </th:block>
+
+            <!-- group: the members -->
+            <th:block th:if="${current.conversation().type.name() == 'GROUP'}">
+                <div class="panel-head">
+                    <div class="role-icon big" th:classappend="${current.conversation().color}">
+                        <i th:class="'bi ' + ${current.conversation().icon}"></i></div>
+                    <h4 class="mb-1" th:text="${current.title()}">Group</h4>
+                    <small class="text-muted">Created <span th:text="${@fmt.date(current.conversation().createdAt)}"></span></small>
+                </div>
+                <h6>Members <span class="pill" th:text="${#lists.size(members)}">3</span></h6>
+                <div class="feed-item" th:each="u : ${members}">
+                    <div class="avatar" th:classappend="'av-' + ${@fmt.colorIndex(u.name)}"
+                         th:text="${@fmt.initials(u.name)}">AB</div>
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold" th:text="${u.name}">Name</div>
+                        <small class="text-muted" th:text="${u.role.name}">Role</small>
+                    </div>
+                </div>
+            </th:block>
+
+            <h6 class="mt-4">Shared Files</h6>
+            <p class="text-muted small" th:if="${#lists.isEmpty(shared.files())}">No files shared yet.</p>
+            <a class="file-card" th:each="f : ${shared.files()}" th:href="@{/chat/files/{id}(id=${f.id})}">
+        <span class="role-icon" th:classappend="${@fmt.fileColor(f.attachmentName)}">
+          <i th:class="'bi ' + ${@fmt.fileIcon(f.attachmentName)}"></i></span>
+                <span class="file-meta">
+          <span class="fw-semibold" th:text="${f.attachmentName}">file.pdf</span>
+          <small class="text-muted" th:text="${@fmt.fileSize(f.attachmentSize)} + ' · ' + ${@fmt.date(f.createdAt)}">4 MB</small>
+        </span>
+            </a>
+
+            <h6 class="mt-4">Shared Media</h6>
+            <p class="text-muted small" th:if="${#lists.isEmpty(shared.media())}">No images shared yet.</p>
+            <div class="media-grid">
+                <a th:each="i : ${shared.media()}" th:href="@{/chat/files/{id}(id=${i.id})}" target="_blank" rel="noopener">
+                    <img th:src="@{/chat/files/{id}(id=${i.id})}" th:alt="${i.attachmentName}" loading="lazy">
+                </a>
+            </div>
+
+            <h6 class="mt-4">Notifications</h6>
+            <div class="access-row">
+                <span class="small text-muted">Mute this conversation</span>
+                <form th:action="@{/chat/{id}/mute(id=${activeId})}" method="post">
+                    <input type="hidden" name="muted" th:value="${!current.muted()}">
+                    <button type="submit" class="switch" th:classappend="${current.muted()} ? 'on'" title="Mute or unmute"></button>
+                </form>
+            </div>
+            <div class="form-text">Muted conversations show a grey unread badge.</div>
+        </aside>
+    </div>
+
+    <script>
+        (function () {
+            // Обновяването спира, когато табът е скрит или никой не е пипал страницата 5 минути,
+            // за да не държи отворен чат сесията жива завинаги.
+            var lastTouch = Date.now();
+            ['mousemove', 'keydown', 'click', 'touchstart', 'scroll'].forEach(function (ev) {
+                document.addEventListener(ev, function () { lastTouch = Date.now(); }, { passive: true, capture: true });
+            });
+            window.chatActive = function () {
+                return document.visibilityState === 'visible' && Date.now() - lastTouch < 5 * 60 * 1000;
+            };
+
+            window.toggleChatInfo = function () {
+                document.getElementById('chatLayout').classList.toggle('info-hidden');
+            };
+
+            // държи нишката превъртяна до последното съобщение, освен ако читателят е скролирал нагоре
+            var box = document.getElementById('messages');
+            var stick = true;
+            if (box) {
+                box.scrollTop = box.scrollHeight;
+                box.addEventListener('scroll', function () {
+                    stick = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+                });
+                new MutationObserver(function () { if (stick) box.scrollTop = box.scrollHeight; })
+                    .observe(box, { childList: true });
+                box.addEventListener('load', function () { if (stick) box.scrollTop = box.scrollHeight; }, true);
+            }
+
+            var composer = document.getElementById('composer');
+            if (composer) {
+                var input = document.getElementById('chatFile');
+                var label = document.getElementById('fileName');
+                input.addEventListener('change', function () {
+                    var f = input.files[0];
+                    if (f && f.size > 5 * 1024 * 1024) {
+                        alert('The file is too large. The limit is 5 MB.');
+                        input.value = '';
+                        f = null;
+                    }
+                    label.textContent = f ? f.name : '';
+                });
+                document.addEventListener('htmx:afterRequest', function (e) {
+                    if (e.detail.elt === composer && e.detail.successful) {
+                        composer.reset();
+                        label.textContent = '';
+                        stick = true;
+                    }
+                });
+            }
+        })();
+    </script>
+</main>
+</body>
+</html>

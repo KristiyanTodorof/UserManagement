@@ -2,6 +2,7 @@ package com.acmestack.common;
 
 import com.acmestack.settings.SettingsService;
 import org.springframework.stereotype.Component;
+import com.acmestack.chat.FileTypes;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -60,6 +61,7 @@ public class Fmt {
             case "Audit Logs" -> "bi-clock-history";
             case "Security" -> "bi-lock";
             case "Reports" -> "bi-bar-chart";
+            case "Chat" -> "bi-chat-dots";
             default -> "bi-shield-check";
         };
     }
@@ -67,4 +69,22 @@ public class Fmt {
     private ZonedDateTime local(LocalDateTime t) {
         return t.atZone(ZoneId.systemDefault()).withZoneSameInstant(settings.current().zoneId());
     }
+
+    public String chatTime(LocalDateTime t) {
+        if (t == null) return "";
+        ZonedDateTime z = local(t);
+        boolean today = z.toLocalDate().equals(ZonedDateTime.now(settings.current().zoneId()).toLocalDate());
+        return z.format(DateTimeFormatter.ofPattern(today ? "h:mm a" : "MMM d, h:mm a", Locale.ENGLISH));
+    }
+
+    public String fileSize(Long bytes) {
+        if (bytes == null) return "";
+        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1024 * 1024) return String.format(Locale.ENGLISH, "%.0f KB", bytes / 1024.0);
+        return String.format(Locale.ENGLISH, "%.1f MB", bytes / (1024.0 * 1024));
+    }
+
+    public boolean isImage(String fileName) { return FileTypes.isImage(fileName); }
+    public String fileIcon(String fileName)  { return FileTypes.icon(fileName); }
+    public String fileColor(String fileName) { return FileTypes.color(fileName); }
 }
