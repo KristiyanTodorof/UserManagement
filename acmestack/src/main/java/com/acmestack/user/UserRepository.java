@@ -56,4 +56,11 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     @Transactional
     @Query("UPDATE User u SET u.lastActiveAt = :now WHERE u.id = :id")
     void touch(@Param("id") Long id, @Param("now") LocalDateTime now);
+
+    @Query("""
+    SELECT u FROM User u JOIN FETCH u.role
+    WHERE u.deletedAt IS NULL AND u.status <> com.acmestack.user.UserStatus.SUSPENDED AND u.id <> :uid
+    ORDER BY u.name
+    """)
+    List<User> findChatCandidates(@Param("uid") Long uid);
 }

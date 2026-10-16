@@ -9,7 +9,8 @@ public final class LandingPages {
             {"role_management.view", "/roles"},
             {"permission_management.view", "/permissions"},
             {"audit.view", "/activity"},
-            {"settings.view", "/settings"}
+            {"settings.view", "/settings"},
+            {"chat.use", "/chat"}
     };
 
     private LandingPages() {}

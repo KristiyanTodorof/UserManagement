@@ -17,7 +17,8 @@ public enum EventType {
     ROLE_UPDATED("Role updated", "bi-shield", Severity.MEDIUM),
     ROLE_DELETED("Role deleted", "bi-shield-x", Severity.HIGH),
     PERMISSION_UPDATED("Permission updated", "bi-shield-check", Severity.MEDIUM),
-    SETTINGS_MODIFIED("Settings modified", "bi-gear", Severity.LOW);
+    SETTINGS_MODIFIED("Settings modified", "bi-gear", Severity.LOW),
+    CHAT_GROUP_CREATED("Chat group created", "bi-chat-dots", Severity.LOW);
 
     private final String label;
     private final String icon;
