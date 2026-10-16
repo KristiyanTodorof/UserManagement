@@ -124,28 +124,6 @@
 
                 </fieldset>
             </form>
-
-            <!-- integrations: outside the form, because each button is its own form -->
-            <section id="integrations" class="set-card">
-                <h5><i class="bi bi-link-45deg me-2"></i>Integrations</h5>
-                <p class="text-muted small">Connect your favorite tools. These are demo switches for now.</p>
-                <div class="int-grid">
-                    <div class="int-card" th:each="i : ${integrations}">
-                        <i class="bi int-icon" th:classappend="${i.icon}"></i>
-                        <div class="flex-grow-1">
-                            <div class="fw-semibold" th:text="${i.name}">Slack</div>
-                            <small class="text-muted" th:text="${i.description}">Team communication</small>
-                        </div>
-                        <span class="pill st-active" th:if="${i.status.name() == 'CONNECTED'}">Connected</span>
-                        <form th:action="@{/settings/integrations/{id}/toggle(id=${i.id})}" method="post"
-                              sec:authorize="hasAuthority('settings.edit')">
-                            <button class="btn btn-sm"
-                                    th:classappend="${i.status.name() == 'CONNECTED'} ? 'btn-outline-secondary' : 'btn-outline-primary'"
-                                    th:text="${i.status.name() == 'CONNECTED'} ? 'Disconnect' : 'Connect'">Connect</button>
-                        </form>
-                    </div>
-                </div>
-            </section>
         </div>
 
         <!-- right column -->
