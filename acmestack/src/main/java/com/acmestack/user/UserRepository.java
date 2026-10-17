@@ -63,4 +63,13 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     ORDER BY u.name
     """)
     List<User> findChatCandidates(@Param("uid") Long uid);
+
+
+    @Query("""
+    SELECT u FROM User u JOIN FETCH u.role
+    WHERE u.deletedAt IS NULL AND u.status <> com.acmestack.user.UserStatus.SUSPENDED
+      AND u.id NOT IN (SELECT cm.user.id FROM ConversationMember cm WHERE cm.conversation.id = :cid)
+    ORDER BY u.name
+    """)
+    List<User> findAddableToConversation(@Param("cid") Long cid);
 }

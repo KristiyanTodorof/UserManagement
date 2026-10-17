@@ -35,6 +35,13 @@ public class Message {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
+
     public Long getId() {
         return id;
     }
@@ -69,6 +76,10 @@ public class Message {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
     }
 
     public void setConversation(Conversation conversation) {
