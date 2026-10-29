@@ -27,8 +27,9 @@
         // show server-side refusals (422) and permission errors (403)
         document.addEventListener('htmx:responseError', function (e) {
             var s = e.detail.xhr.status;
-            alert(s === 422 ? e.detail.xhr.responseText
-                : s === 403 ? "You don't have permission to do that."
+            var text = e.detail.xhr.responseText;
+            alert(s === 403 ? "You don't have permission to do that."
+                : (s === 400 || s === 404 || s === 409 || s === 422) && text && text.length < 300 ? text
                     : 'Something went wrong.');
         });
     </script>

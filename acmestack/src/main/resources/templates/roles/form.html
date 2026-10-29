@@ -12,7 +12,7 @@
 
             <div class="mb-3">
                 <label class="form-label">Name</label>
-                <input type="text" th:field="*{name}" class="form-control"
+                <input type="text" th:field="*{name}" class="form-control" maxlength="50" required
                        th:readonly="${systemRole}"
                        th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'">
                 <div class="form-text" th:if="${systemRole}">System roles can't be renamed.</div>
@@ -21,7 +21,7 @@
 
             <div class="mb-3">
                 <label class="form-label">Description</label>
-                <textarea th:field="*{description}" rows="3" class="form-control"
+                <textarea th:field="*{description}" rows="3" class="form-control" maxlength="255"
                           th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"></textarea>
                 <div class="invalid-feedback" th:errors="*{description}"></div>
             </div>

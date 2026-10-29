@@ -37,7 +37,7 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Workspace Name</label>
-                                <input type="text" th:field="*{name}" class="form-control"
+                                <input type="text" th:field="*{name}" class="form-control" maxlength="100" required
                                        th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'">
                                 <div class="invalid-feedback" th:errors="*{name}"></div>
                                 <div class="form-text">This name is shown across the application.</div>
