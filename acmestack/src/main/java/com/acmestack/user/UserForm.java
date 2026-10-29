@@ -3,16 +3,19 @@ package com.acmestack.user;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 public class UserForm {
 
     private Long id;
 
     @NotBlank(message = "Name is required")
+    @Size(max = 100, message = "Maximum 100 characters")
     private String name;
 
     @NotBlank(message = "Email is required")
-    @Email(message = "Enter a valid email")
+    @Size(max = 150, message = "Maximum 150 characters")
+    @Email(regexp = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", message = "Enter a valid email")
     private String email;
 
     @NotNull(message = "Choose a role")
