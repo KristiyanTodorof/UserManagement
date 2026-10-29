@@ -3,6 +3,7 @@ package com.acmestack.user;
 import com.acmestack.audit.AuditService;
 import com.acmestack.audit.EventType;
 import com.acmestack.common.BusinessException;
+import com.acmestack.common.NotFoundException;
 import com.acmestack.permission.Effect;
 import com.acmestack.permission.RolePermission;
 import com.acmestack.permission.RolePermissionRepository;
@@ -73,7 +74,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public User get(Long id) {
-        return users.findActiveById(id).orElseThrow(() -> new BusinessException("User not found."));
+        return users.findActiveById(id).orElseThrow(() -> new NotFoundException("User not found."));
     }
 
     @Transactional(readOnly = true)
